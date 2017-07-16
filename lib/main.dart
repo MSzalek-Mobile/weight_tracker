@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:weight_tracker/WeightListItem.dart';
+import 'package:weight_tracker/model/WeightSave.dart';
 
 void main() {
   runApp(new MyApp());
@@ -9,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Weight Tracker',
       theme: new ThemeData(
         primarySwatch: Colors.green,
       ),
@@ -27,11 +29,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List<WeightSave> weightSaves = new List();
 
-  void _incrementCounter() {
+
+  void _addWeightSave() {
     setState(() {
-      _counter++;
+      weightSaves.add(new WeightSave(new DateTime.now(), 23.6));
     });
   }
 
@@ -42,15 +45,22 @@ class _MyHomePageState extends State<MyHomePage> {
         title: new Text(widget.title),
       ),
       body: new Center(
-        child: new Text(
-          'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
+        child: new ListView(
+          children:
+          weightSaves.map((WeightSave weightSave) {
+            return new WeightListItem(weightSave);
+          }).toList(),
         ),
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _addWeightSave,
         tooltip: 'Increment',
         child: new Icon(Icons.add),
       ),
     );
+  }
+
+  void _showAddingWeightSaveDialog() {
+    //TODO
   }
 }
