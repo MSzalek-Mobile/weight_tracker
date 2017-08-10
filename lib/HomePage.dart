@@ -1,7 +1,8 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:weight_tracker/WeightListItem.dart';
+import 'package:weight_tracker/add_entry_dialog.dart';
 import 'package:weight_tracker/model/WeightSave.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,34 +16,46 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<WeightSave> weightSaves = new List();
 
-  void _addWeightSave() {
-    setState(() {
-      weightSaves.add(new WeightSave(
-          new DateTime.now(), new Random().nextInt(100).toDouble()));
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
-      body: new ListView(
-        children: weightSaves.map((WeightSave weightSave) {
+      body: new ListView.builder(
+        itemCount: weightSaves.length,
+        itemBuilder: (buildContext, index) {
           //calculating difference
-          double difference = weightSaves.first == weightSave
+          double difference = index == 0
               ? 0.0
-              : weightSave.weight -
-                  weightSaves[weightSaves.indexOf(weightSave) - 1].weight;
-          return new WeightListItem(weightSave, difference);
-        }).toList(),
+              : weightSaves[index].weight - weightSaves[index - 1].weight;
+          return new WeightListItem(weightSaves[index], difference);
+        },
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: _addWeightSave,
+        onPressed: _openAddEntryDialog,
         tooltip: 'Add new weight entry',
         child: new Icon(Icons.add),
       ),
     );
+  }
+
+  void _addWeightSave(WeightSave weightSave) {
+    setState(() {
+      weightSaves.add(weightSave);
+    });
+  }
+
+  Future _openAddEntryDialog() async {
+    WeightSave save =
+    await Navigator.of(context).push(new MaterialPageRoute<WeightSave>(
+        builder: (BuildContext context) {
+          return new AddEntryDialog.add(
+              weightSaves.isNotEmpty ? weightSaves.last.weight : 60.0);
+        },
+        fullscreenDialog: true));
+    if (save != null) {
+      _addWeightSave(save);
+    }
   }
 }
