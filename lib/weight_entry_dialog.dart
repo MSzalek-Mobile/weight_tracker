@@ -31,109 +31,76 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
   DateTime _dateTime = new DateTime.now();
   double _weight;
   String _note;
-
-  TextField _noteTextField;
+  TextEditingController _textController;
 
   WeightEntryDialogState(this._dateTime, this._weight, this._note);
 
+  Widget _createAppBar(BuildContext context) {
+    return new AppBar(
+      title: widget.weighEntryToEdit == null
+          ? const Text("New entry")
+          : const Text("Edit entry"),
+      actions: [
+        new FlatButton(
+          onPressed: () {
+            Navigator
+                .of(context)
+                .pop(new WeightEntry(_dateTime, _weight, _note));
+          },
+          child: new Text('SAVE',
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .subhead
+                  .copyWith(color: Colors.white)),
+        ),
+      ],
+    );
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = new TextEditingController(text: _note);
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextStyle defaultTextStyle = Theme
-        .of(context)
-        .textTheme
-        .subhead
-        .copyWith(color: Colors.black, fontSize: 16.0);
-
-    _noteTextField = new TextField(
-      decoration: new InputDecoration(
-        labelText: 'Optional note',
-      ),
-      controller: new TextEditingController(text: _note),
-      onSubmitted: (string) => setState(() => _note = string),
-    );
-
     return new Scaffold(
-      appBar: new AppBar(
-        title: widget.weighEntryToEdit == null
-            ? const Text("New entry")
-            : const Text("Edit entry"),
-        actions: [
-          new FlatButton(
-              onPressed: () {
-                _note = _noteTextField.controller.text;
-                Navigator
-                    .of(context)
-                    .pop(new WeightEntry(_dateTime, _weight, _note));
-              },
-              child: new Text('SAVE',
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .subhead
-                      .copyWith(color: Colors.white))),
-        ],
-      ),
-      body: new DefaultTextStyle(
-        style: defaultTextStyle,
-        child: new Padding(
-          padding: new EdgeInsets.all(12.0),
-          child: new Column(
-            children: <Widget>[
-              new Padding(
-                padding: new EdgeInsets.all(8.0),
-                child: new DateTimeItem(
-                  dateTime: _dateTime,
-                  onChanged: (dateTime) => setState(() => _dateTime = dateTime),
-                ),
-              ),
-              new Padding(
-                padding: new EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
-                child: new InkWell(
-                  onTap: () => _showWeightPicker(context),
-                  child: new Row(
-                    children: <Widget>[
-                      new Image.asset(
-                        "assets/scale-bathroom.png",
-                        color: Colors.grey[500],
-                        height: 24.0,
-                        width: 24.0,
-                      ),
-                      new Padding(
-                        padding: new EdgeInsets.only(left: 16.0),
-                        child: new Text(
-                          "$_weight kg",
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              new Padding(
-                padding: new EdgeInsets.symmetric(horizontal: 8.0),
-                child: new InkWell(
-                  onTap: () => _showWeightPicker(context),
-                  child: new Row(
-                    children: <Widget>[
-                      new Padding(
-                        padding: new EdgeInsets.only(top: 4.0),
-                        child: new Icon(
-                          Icons.speaker_notes,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      new Expanded(
-                        child: new Padding(
-                          padding: new EdgeInsets.only(left: 16.0),
-                          child: _noteTextField,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      appBar: _createAppBar(context),
+      body: new Column(
+        children: [
+          new ListTile(
+            leading: new Icon(Icons.today, color: Colors.grey[500]),
+            title: new DateTimeItem(
+              dateTime: _dateTime,
+              onChanged: (dateTime) => setState(() => _dateTime = dateTime),
+            ),
           ),
-        ),
+          new ListTile(
+            leading: new Image.asset(
+              "assets/scale-bathroom.png",
+              color: Colors.grey[500],
+              height: 24.0,
+              width: 24.0,
+            ),
+            title: new Text(
+              "$_weight kg",
+            ),
+            onTap: () => _showWeightPicker(context),
+          ),
+          new ListTile(
+            leading: new Icon(Icons.speaker_notes, color: Colors.grey[500]),
+            title: new TextField(
+              decoration: new InputDecoration(
+                hintText: 'Optional note',
+              ),
+              controller: _textController,
+              onChanged: (value) => _note = value,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -176,38 +143,17 @@ class DateTimeItem extends StatelessWidget {
       children: <Widget>[
         new Expanded(
           child: new InkWell(
-            onTap: () {
-              _showDatePicker(context);
-            },
+            onTap: (() => _showDatePicker(context)),
             child: new Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  new Icon(Icons.today, color: Colors.grey[500]),
-                  new Padding(
-                    padding: new EdgeInsets.only(left: 16.0),
-                    child:
-                        new Text(new DateFormat('EEEE, MMMM d').format(date)),
-                  ),
-                ],
-              ),
-            ),
+                padding: new EdgeInsets.symmetric(vertical: 8.0),
+                child: new Text(new DateFormat('EEEE, MMMM d').format(date))),
           ),
         ),
         new InkWell(
-          onTap: () {
-            _showTimePicker(context);
-          },
-          child: new Container(
-            margin: const EdgeInsets.only(left: 8.0),
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: new Row(
-              children: <Widget>[
-                new Text('$time'),
-              ],
-            ),
-          ),
+          onTap: (() => _showTimePicker(context)),
+          child: new Padding(
+              padding: new EdgeInsets.symmetric(vertical: 8.0),
+              child: new Text('$time')),
         ),
       ],
     );
