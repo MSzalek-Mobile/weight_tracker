@@ -1,4 +1,4 @@
-package com.yourcompany.weight_tracker;
+package com.mszalek.weight_tracker;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

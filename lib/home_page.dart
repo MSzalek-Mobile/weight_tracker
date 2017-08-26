@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/weight_entry_dialog.dart';
@@ -13,10 +14,17 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => new _HomePageState();
 }
 
+final mainReference = FirebaseDatabase.instance.reference();
+
 class _HomePageState extends State<HomePage> {
   List<WeightEntry> weightSaves = new List();
   ScrollController _listViewScrollController = new ScrollController();
   double _itemExtent = 50.0;
+
+  _HomePageState() {
+    mainReference.onChildAdded.listen(_onEntryAdded);
+    mainReference.onChildChanged.listen(_onEntryEdited);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,7 @@ class _HomePageState extends State<HomePage> {
               ? 0.0
               : weightSaves[index].weight - weightSaves[index - 1].weight;
           return new InkWell(
-              onTap: () => _editEntry(weightSaves[index]),
+              onTap: () => _openEditEntryDialog(weightSaves[index]),
               child: new WeightListItem(weightSaves[index], difference));
         },
       ),
@@ -47,45 +55,60 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _addWeightSave(WeightEntry weightSave) {
-    setState(() {
-      weightSaves.add(weightSave);
-      _listViewScrollController.animateTo(
-        weightSaves.length * _itemExtent,
-        duration: const Duration(microseconds: 1),
-        curve: new ElasticInCurve(0.01),
-      );
-    });
-  }
-
-  _editEntry(WeightEntry weightSave) {
+  _openEditEntryDialog(WeightEntry weightEntry) {
     Navigator
         .of(context)
         .push(
       new MaterialPageRoute<WeightEntry>(
         builder: (BuildContext context) {
-          return new WeightEntryDialog.edit(weightSave);
+          return new WeightEntryDialog.edit(weightEntry);
         },
         fullscreenDialog: true,
       ),
     )
-        .then((newSave) {
-      if (newSave != null) {
-        setState(() => weightSaves[weightSaves.indexOf(weightSave)] = newSave);
+        .then((WeightEntry newEntry) {
+      if (newEntry != null) {
+        mainReference.child(weightEntry.key).set(newEntry.toJson());
       }
     });
   }
 
   Future _openAddEntryDialog() async {
-    WeightEntry save =
+    WeightEntry entry =
     await Navigator.of(context).push(new MaterialPageRoute<WeightEntry>(
         builder: (BuildContext context) {
           return new WeightEntryDialog.add(
               weightSaves.isNotEmpty ? weightSaves.last.weight : 60.0);
         },
         fullscreenDialog: true));
-    if (save != null) {
-      _addWeightSave(save);
+    if (entry != null) {
+      mainReference.push().set(entry.toJson());
     }
+  }
+
+  _onEntryAdded(Event event) {
+    setState(() {
+      weightSaves.add(new WeightEntry.fromSnapshot(event.snapshot));
+      weightSaves.sort((we1, we2) => we1.dateTime.compareTo(we2.dateTime));
+    });
+    _scrollToTop();
+  }
+
+  _onEntryEdited(Event event) {
+    var oldValue =
+    weightSaves.singleWhere((entry) => entry.key == event.snapshot.key);
+    setState(() {
+      weightSaves[weightSaves.indexOf(oldValue)] =
+      new WeightEntry.fromSnapshot(event.snapshot);
+      weightSaves.sort((we1, we2) => we1.dateTime.compareTo(we2.dateTime));
+    });
+  }
+
+  _scrollToTop() {
+    _listViewScrollController.animateTo(
+      weightSaves.length * _itemExtent,
+      duration: const Duration(microseconds: 1),
+      curve: new ElasticInCurve(0.01),
+    );
   }
 }

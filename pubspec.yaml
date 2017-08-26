@@ -5,23 +5,16 @@ dependencies:
   flutter:
     sdk: flutter
   numberpicker: "^0.1.0"
+#  google_sign_in: 0.3.1
+#  firebase_analytics: 0.0.4
+#  firebase_auth: 0.2.0
+  firebase_database: 0.0.12
 
-# For information on the generic Dart part of this file, see the
-# following page: https://www.dartlang.org/tools/pub/pubspec
-
-# The following section is specific to Flutter.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the Icons class.
   uses-material-design: true
-
-  # To add assets to your application, add an assets section here, in
-  # this "flutter" section, as in:
   assets:
     - assets/scale-bathroom.png
-  #  - images/a_dot_ham.jpeg
 
   # To add assets from package dependencies, first ensure the asset
   # is in the lib/ directory of the dependency. Then,
