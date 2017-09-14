@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
@@ -14,7 +15,15 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => new _HomePageState();
 }
 
-final mainReference = FirebaseDatabase.instance.reference();
+Future<Null> loginAnonymous() async {
+  FirebaseUser user = await FirebaseAuth.instance.currentUser();
+  if (user == null) {
+    user = await FirebaseAuth.instance.signInAnonymously();
+  }
+}
+
+FirebaseUser firebaseUser;
+DatabaseReference mainReference;
 
 class _HomePageState extends State<HomePage> {
   List<WeightEntry> weightSaves = new List();
@@ -22,6 +31,15 @@ class _HomePageState extends State<HomePage> {
   double _itemExtent = 50.0;
 
   _HomePageState() {
+    loginAnonymous().then((value) => updateFirebaseAuth());
+  }
+
+  updateFirebaseAuth() async {
+    firebaseUser = await FirebaseAuth.instance.currentUser();
+    mainReference = FirebaseDatabase.instance
+        .reference()
+        .child(firebaseUser.uid)
+        .child("entries");
     mainReference.onChildAdded.listen(_onEntryAdded);
     mainReference.onChildChanged.listen(_onEntryEdited);
   }
