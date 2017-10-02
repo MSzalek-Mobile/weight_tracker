@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
+import 'package:weight_tracker/logic/redux_core.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/weight_entry_dialog.dart';
 import 'package:weight_tracker/weight_list_item.dart';
@@ -15,61 +16,49 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => new _HomePageState();
 }
 
-Future<Null> loginAnonymous() async {
-  FirebaseUser user = await FirebaseAuth.instance.currentUser();
-  if (user == null) {
-    user = await FirebaseAuth.instance.signInAnonymously();
-  }
-}
-
-FirebaseUser firebaseUser;
-DatabaseReference mainReference;
-
 class _HomePageState extends State<HomePage> {
-  List<WeightEntry> weightSaves = new List();
   ScrollController _listViewScrollController = new ScrollController();
-  double _itemExtent = 50.0;
-
-  _HomePageState() {
-    loginAnonymous().then((value) => updateFirebaseAuth());
-  }
-
-  updateFirebaseAuth() async {
-    firebaseUser = await FirebaseAuth.instance.currentUser();
-    mainReference = FirebaseDatabase.instance
-        .reference()
-        .child(firebaseUser.uid)
-        .child("entries");
-    mainReference.onChildAdded.listen(_onEntryAdded);
-    mainReference.onChildChanged.listen(_onEntryEdited);
-  }
+  Store<ReduxState> _store;
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
-      body: new ListView.builder(
-        shrinkWrap: true,
-        reverse: true,
-        controller: _listViewScrollController,
-        itemCount: weightSaves.length,
-        itemBuilder: (buildContext, index) {
-          //calculating difference
-          double difference = index == 0
-              ? 0.0
-              : weightSaves[index].weight - weightSaves[index - 1].weight;
-          return new InkWell(
-              onTap: () => _openEditEntryDialog(weightSaves[index]),
-              child: new WeightListItem(weightSaves[index], difference));
-        },
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _openAddEntryDialog,
-        tooltip: 'Add new weight entry',
-        child: new Icon(Icons.add),
-      ),
+    return new StoreConnector<ReduxState, Null>(
+      converter: (store) {
+        _store = store;
+      },
+      builder: (context, nil) {
+        if (_store.state.hasEntryBeenAdded) {
+          _scrollToTop();
+          _store.dispatch(new AcceptEntryAddedAction());
+        }
+        return new Scaffold(
+          appBar: new AppBar(
+            title: new Text(widget.title),
+          ),
+          body: new ListView.builder(
+            shrinkWrap: true,
+            controller: _listViewScrollController,
+            itemCount: _store.state.entries.length,
+            itemBuilder: (buildContext, index) {
+              //calculating difference
+              double difference = index == _store.state.entries.length - 1
+                  ? 0.0
+                  : _store.state.entries[index].weight -
+                  _store.state.entries[index + 1].weight;
+              return new InkWell(
+                  onTap: () =>
+                      _openEditEntryDialog(_store.state.entries[index]),
+                  child: new WeightListItem(
+                      _store.state.entries[index], difference));
+            },
+          ),
+          floatingActionButton: new FloatingActionButton(
+            onPressed: _openAddEntryDialog,
+            tooltip: 'Add new weight entry',
+            child: new Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
@@ -86,7 +75,8 @@ class _HomePageState extends State<HomePage> {
     )
         .then((WeightEntry newEntry) {
       if (newEntry != null) {
-        mainReference.child(weightEntry.key).set(newEntry.toJson());
+        newEntry.key = weightEntry.key;
+        _store.dispatch(new LocalEditAction(newEntry));
       }
     });
   }
@@ -95,36 +85,19 @@ class _HomePageState extends State<HomePage> {
     WeightEntry entry =
     await Navigator.of(context).push(new MaterialPageRoute<WeightEntry>(
         builder: (BuildContext context) {
-          return new WeightEntryDialog.add(
-              weightSaves.isNotEmpty ? weightSaves.last.weight : 60.0);
+          return new WeightEntryDialog.add(_store.state.entries.isNotEmpty
+              ? _store.state.entries.first.weight
+              : 60.0);
         },
         fullscreenDialog: true));
     if (entry != null) {
-      mainReference.push().set(entry.toJson());
+      _store.dispatch(new LocalAddAction(entry));
     }
-  }
-
-  _onEntryAdded(Event event) {
-    setState(() {
-      weightSaves.add(new WeightEntry.fromSnapshot(event.snapshot));
-      weightSaves.sort((we1, we2) => we1.dateTime.compareTo(we2.dateTime));
-    });
-    _scrollToTop();
-  }
-
-  _onEntryEdited(Event event) {
-    var oldValue =
-    weightSaves.singleWhere((entry) => entry.key == event.snapshot.key);
-    setState(() {
-      weightSaves[weightSaves.indexOf(oldValue)] =
-      new WeightEntry.fromSnapshot(event.snapshot);
-      weightSaves.sort((we1, we2) => we1.dateTime.compareTo(we2.dateTime));
-    });
   }
 
   _scrollToTop() {
     _listViewScrollController.animateTo(
-      weightSaves.length * _itemExtent,
+      0.0,
       duration: const Duration(microseconds: 1),
       curve: new ElasticInCurve(0.01),
     );

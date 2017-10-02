@@ -1,21 +1,29 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 import 'package:weight_tracker/home_page.dart';
+import 'package:weight_tracker/logic/redux_core.dart';
+
 
 void main() {
-  FirebaseDatabase.instance.setPersistenceEnabled(true);
   runApp(new MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  final Store store = new Store(stateReducer, initialState: new ReduxState());
+
   @override
   Widget build(BuildContext context) {
+    store.dispatch(new InitAction(store));
     return new MaterialApp(
       title: 'Weight Tracker',
       theme: new ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: new HomePage(title: 'Weight Tracker'),
+      home: new StoreProvider(
+        store: store,
+        child: new HomePage(title: 'Weight Tracker'),
+      ),
     );
   }
 }

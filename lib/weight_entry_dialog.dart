@@ -163,7 +163,7 @@ class DateTimeItem extends StatelessWidget {
     DateTime dateTimePicked = await showDatePicker(
         context: context,
         initialDate: date,
-        firstDate: date.subtract(const Duration(days: 20000)),
+        firstDate: date.subtract(const Duration(days: 365)),
         lastDate: new DateTime.now());
 
     if (dateTimePicked != null) {
