@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:redux/redux.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/weight_entry_dialog.dart';
@@ -16,20 +13,38 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => new _HomePageState();
 }
 
+class HomePageViewModel {
+  //fields
+  bool hasEntryBeenAdded;
+  List<WeightEntry> entries;
+
+  //functions
+  var acceptEntryAddedCallback;
+  var editEntryCallback;
+  var addEntryCallback;
+}
+
 class _HomePageState extends State<HomePage> {
   ScrollController _listViewScrollController = new ScrollController();
-  Store<ReduxState> _store;
 
   @override
   Widget build(BuildContext context) {
-    return new StoreConnector<ReduxState, Null>(
+    return new StoreConnector<ReduxState, HomePageViewModel>(
       converter: (store) {
-        _store = store;
+        return new HomePageViewModel()
+          ..hasEntryBeenAdded = store.state.hasEntryBeenAdded
+          ..entries = store.state.entries
+          ..acceptEntryAddedCallback =
+          (() => store.dispatch(new AcceptEntryAddedAction()))
+          ..addEntryCallback =
+          ((entry) => store.dispatch(new LocalAddAction(entry)))
+          ..editEntryCallback =
+          ((entry) => store.dispatch(new LocalEditAction(entry)));
       },
-      builder: (context, nil) {
-        if (_store.state.hasEntryBeenAdded) {
+      builder: (context, viewModel) {
+        if (viewModel.hasEntryBeenAdded) {
           _scrollToTop();
-          _store.dispatch(new AcceptEntryAddedAction());
+          viewModel.acceptEntryAddedCallback();
         }
         return new Scaffold(
           appBar: new AppBar(
@@ -38,22 +53,26 @@ class _HomePageState extends State<HomePage> {
           body: new ListView.builder(
             shrinkWrap: true,
             controller: _listViewScrollController,
-            itemCount: _store.state.entries.length,
+            itemCount: viewModel.entries.length,
             itemBuilder: (buildContext, index) {
               //calculating difference
-              double difference = index == _store.state.entries.length - 1
+              double difference = index == viewModel.entries.length - 1
                   ? 0.0
-                  : _store.state.entries[index].weight -
-                  _store.state.entries[index + 1].weight;
+                  : viewModel.entries[index].weight -
+                  viewModel.entries[index + 1].weight;
               return new InkWell(
                   onTap: () =>
-                      _openEditEntryDialog(_store.state.entries[index]),
-                  child: new WeightListItem(
-                      _store.state.entries[index], difference));
+                      _openEditEntryDialog(
+                          viewModel.entries[index],
+                          viewModel.editEntryCallback),
+                  child:
+                  new WeightListItem(viewModel.entries[index], difference));
             },
           ),
           floatingActionButton: new FloatingActionButton(
-            onPressed: _openAddEntryDialog,
+            onPressed: () =>
+                _openAddEntryDialog(
+                    viewModel.entries, viewModel.addEntryCallback),
             tooltip: 'Add new weight entry',
             child: new Icon(Icons.add),
           ),
@@ -62,7 +81,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _openEditEntryDialog(WeightEntry weightEntry) {
+  _openEditEntryDialog(WeightEntry weightEntry, onSubmittedCallback) async {
     Navigator
         .of(context)
         .push(
@@ -76,22 +95,21 @@ class _HomePageState extends State<HomePage> {
         .then((WeightEntry newEntry) {
       if (newEntry != null) {
         newEntry.key = weightEntry.key;
-        _store.dispatch(new LocalEditAction(newEntry));
+        onSubmittedCallback(newEntry);
       }
     });
   }
 
-  Future _openAddEntryDialog() async {
+  _openAddEntryDialog(List<WeightEntry> entries, onSubmittedCallback) async {
     WeightEntry entry =
     await Navigator.of(context).push(new MaterialPageRoute<WeightEntry>(
         builder: (BuildContext context) {
-          return new WeightEntryDialog.add(_store.state.entries.isNotEmpty
-              ? _store.state.entries.first.weight
-              : 60.0);
+          return new WeightEntryDialog.add(
+              entries.isNotEmpty ? entries.first.weight : 60.0);
         },
         fullscreenDialog: true));
     if (entry != null) {
-      _store.dispatch(new LocalAddAction(entry));
+      onSubmittedCallback(entry);
     }
   }
 

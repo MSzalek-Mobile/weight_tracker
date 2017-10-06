@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:redux/redux.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 class LocalAddAction {
@@ -17,11 +16,13 @@ class LocalEditAction {
   LocalEditAction(this.weightEntry);
 }
 
-class InitAction {
-  //It is needed so we can invoke methods when we got firebase results
-  final Store<ReduxState> store;
+typedef void EventCallback(Event event);
 
-  InitAction(this.store);
+class InitAction {
+  final EventCallback onEntryAddedCallback;
+  final EventCallback onEntryEditedCallback;
+
+  InitAction({this.onEntryAddedCallback, this.onEntryEditedCallback});
 }
 
 class OnAddedAction {
@@ -48,8 +49,7 @@ class ReduxState {
 ReduxState stateReducer(ReduxState state, action) {
   if (action is InitAction) {
     FirebaseDatabase.instance.setPersistenceEnabled(true);
-    _loginAnonymous(action.store.state)
-        .then((nil) => _updateFirebaseAuth(action.store));
+    _loginAnonymous(state).then((nil) => _updateFirebaseAuth(state, action));
   } else if (action is LocalAddAction) {
     _addEntry(state, action.weightEntry);
   } else if (action is LocalEditAction) {
@@ -73,16 +73,13 @@ Future<Null> _loginAnonymous(ReduxState state) async {
   }
 }
 
-_updateFirebaseAuth(Store<ReduxState> store) async {
-  store.state.firebaseUser = await FirebaseAuth.instance.currentUser();
-  store.state.mainReference = FirebaseDatabase.instance
+_updateFirebaseAuth(ReduxState state, InitAction action) async {
+  state.mainReference = FirebaseDatabase.instance
       .reference()
-      .child(store.state.firebaseUser.uid)
+      .child(state.firebaseUser.uid)
       .child("entries");
-  store.state.mainReference.onChildAdded
-      .listen((event) => store.dispatch(new OnAddedAction(event)));
-  store.state.mainReference.onChildChanged
-      .listen((event) => store.dispatch(new OnChangedAction(event)));
+  state.mainReference.onChildAdded.listen(action.onEntryAddedCallback);
+  state.mainReference.onChildChanged.listen(action.onEntryEditedCallback);
 }
 
 _addEntry(ReduxState state, WeightEntry entry) {

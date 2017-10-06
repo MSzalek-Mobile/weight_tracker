@@ -4,7 +4,6 @@ import 'package:redux/redux.dart';
 import 'package:weight_tracker/home_page.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
 
-
 void main() {
   runApp(new MyApp());
 }
@@ -14,7 +13,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    store.dispatch(new InitAction(store));
+    store.dispatch(new InitAction(
+      onEntryAddedCallback: (event) => store.dispatch(new OnAddedAction(event)),
+      onEntryEditedCallback: (event) =>
+          store.dispatch(new OnChangedAction(event)),
+    ));
     return new MaterialApp(
       title: 'Weight Tracker',
       theme: new ThemeData(
