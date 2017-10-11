@@ -49,7 +49,8 @@ class ReduxState {
 ReduxState stateReducer(ReduxState state, action) {
   if (action is InitAction) {
     FirebaseDatabase.instance.setPersistenceEnabled(true);
-    _loginAnonymous(state).then((nil) => _updateFirebaseAuth(state, action));
+    _loginAnonymous(state).then((nil) =>
+        _updateFirebaseDatabase(state, action));
   } else if (action is LocalAddAction) {
     _addEntry(state, action.weightEntry);
   } else if (action is LocalEditAction) {
@@ -73,7 +74,7 @@ Future<Null> _loginAnonymous(ReduxState state) async {
   }
 }
 
-_updateFirebaseAuth(ReduxState state, InitAction action) async {
+_updateFirebaseDatabase(ReduxState state, InitAction action) async {
   state.mainReference = FirebaseDatabase.instance
       .reference()
       .child(state.firebaseUser.uid)
