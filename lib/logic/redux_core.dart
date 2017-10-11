@@ -1,106 +1,106 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:meta/meta.dart';
+import 'package:redux/redux.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
-class LocalAddAction {
-  final WeightEntry weightEntry;
-
-  LocalAddAction(this.weightEntry);
-}
-
-class LocalEditAction {
-  final WeightEntry weightEntry;
-
-  LocalEditAction(this.weightEntry);
-}
-
-typedef void EventCallback(Event event);
-
-class InitAction {
-  final EventCallback onEntryAddedCallback;
-  final EventCallback onEntryEditedCallback;
-
-  InitAction({this.onEntryAddedCallback, this.onEntryEditedCallback});
-}
-
-class OnAddedAction {
-  final Event event;
-
-  OnAddedAction(this.event);
-}
-
-class OnChangedAction {
-  final Event event;
-
-  OnChangedAction(this.event);
-}
-
-class AcceptEntryAddedAction {}
-
+@immutable
 class ReduxState {
-  FirebaseUser firebaseUser;
-  DatabaseReference mainReference;
-  List<WeightEntry> entries = new List();
-  bool hasEntryBeenAdded = false;
+  final FirebaseUser firebaseUser;
+  final DatabaseReference mainReference;
+  final List<WeightEntry> entries;
+  final bool hasEntryBeenAdded;
+
+  ReduxState({this.firebaseUser,
+    this.mainReference,
+    this.entries,
+    this.hasEntryBeenAdded});
+
+  ReduxState copyWith({FirebaseUser firebaseUser,
+    DatabaseReference mainReference,
+    List<WeightEntry> entries,
+    bool hasEntryBeenAdded}) {
+    return new ReduxState(
+        firebaseUser: firebaseUser ?? this.firebaseUser,
+        mainReference: mainReference ?? this.mainReference,
+        entries: entries ?? this.entries,
+        hasEntryBeenAdded: hasEntryBeenAdded ?? this.hasEntryBeenAdded);
+  }
+}
+
+firebaseMiddleware(Store<ReduxState> store, action, NextDispatcher next) {
+  print(action.runtimeType);
+  if (action is InitAction) {
+    if (store.state.firebaseUser == null) {
+      FirebaseAuth.instance.currentUser().then((user) {
+        if (user != null) {
+          store.dispatch(new UserLoadedAction(user));
+        } else {
+          FirebaseAuth.instance
+              .signInAnonymously()
+              .then((user) => store.dispatch(new UserLoadedAction(user)));
+        }
+      });
+    }
+  } else if (action is LocalAddAction) {
+    store.state.mainReference.push().set(action.weightEntry.toJson());
+  } else if (action is LocalEditAction) {
+    store.state.mainReference
+        .child(action.weightEntry.key)
+        .set(action.weightEntry.toJson());
+  }
+
+  next(action);
+
+  if (action is UserLoadedAction) {
+    store.dispatch(new AddDatabaseReferenceAction(FirebaseDatabase.instance
+        .reference()
+        .child(store.state.firebaseUser.uid)
+        .child("entries")
+      ..onChildAdded
+          .listen((event) => store.dispatch(new OnAddedAction(event)))
+      ..onChildChanged
+          .listen((event) => store.dispatch(new OnChangedAction(event)))));
+  }
 }
 
 ReduxState stateReducer(ReduxState state, action) {
+  ReduxState newState = state;
   if (action is InitAction) {
     FirebaseDatabase.instance.setPersistenceEnabled(true);
-    _loginAnonymous(state).then((nil) =>
-        _updateFirebaseDatabase(state, action));
-  } else if (action is LocalAddAction) {
-    _addEntry(state, action.weightEntry);
-  } else if (action is LocalEditAction) {
-    _editEntry(state, action.weightEntry);
+  } else if (action is UserLoadedAction) {
+    newState = state.copyWith(firebaseUser: action.firebaseUser);
+  } else if (action is AddDatabaseReferenceAction) {
+    newState = state.copyWith(mainReference: action.databaseReference);
   } else if (action is OnAddedAction) {
-    _onEntryAdded(state, action.event);
+    newState = _onEntryAdded(state, action.event);
   } else if (action is OnChangedAction) {
-    _onEntryEdited(state, action.event);
+    newState = _onEntryEdited(state, action.event);
   } else if (action is AcceptEntryAddedAction) {
-    state.hasEntryBeenAdded = false;
+    newState = state.copyWith(hasEntryBeenAdded: false);
   }
-  return state;
+  return newState;
 }
 
-Future<Null> _loginAnonymous(ReduxState state) async {
-  if (state.firebaseUser == null) {
-    state.firebaseUser = await FirebaseAuth.instance.currentUser();
-  }
-  if (state.firebaseUser == null) {
-    state.firebaseUser = await FirebaseAuth.instance.signInAnonymously();
-  }
+ReduxState _onEntryAdded(ReduxState state, Event event) {
+  return state.copyWith(
+    hasEntryBeenAdded: true,
+    entries: <WeightEntry>[]
+      ..addAll(state.entries)
+      ..add(new WeightEntry.fromSnapshot(event.snapshot))
+      ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime)),
+  );
 }
 
-_updateFirebaseDatabase(ReduxState state, InitAction action) async {
-  state.mainReference = FirebaseDatabase.instance
-      .reference()
-      .child(state.firebaseUser.uid)
-      .child("entries");
-  state.mainReference.onChildAdded.listen(action.onEntryAddedCallback);
-  state.mainReference.onChildChanged.listen(action.onEntryEditedCallback);
-}
-
-_addEntry(ReduxState state, WeightEntry entry) {
-  state.mainReference.push().set(entry.toJson());
-}
-
-_editEntry(ReduxState state, WeightEntry entry) {
-  state.mainReference.child(entry.key).set(entry.toJson());
-}
-
-_onEntryAdded(ReduxState state, Event event) {
-  state.entries.add(new WeightEntry.fromSnapshot(event.snapshot));
-  state.entries.sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
-  state.hasEntryBeenAdded = true;
-}
-
-_onEntryEdited(ReduxState state, Event event) {
+ReduxState _onEntryEdited(ReduxState state, Event event) {
   var oldValue =
       state.entries.singleWhere((entry) => entry.key == event.snapshot.key);
-  state.entries[state.entries.indexOf(oldValue)] =
-      new WeightEntry.fromSnapshot(event.snapshot);
-  state.entries.sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
+  return state.copyWith(
+    entries: <WeightEntry>[]
+      ..addAll(state.entries)
+      ..[state.entries.indexOf(oldValue)] =
+      new WeightEntry.fromSnapshot(event.snapshot)
+      ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime)),
+  );
 }

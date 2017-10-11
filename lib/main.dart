@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import 'package:weight_tracker/home_page.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
 
 void main() {
@@ -9,15 +10,17 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final Store store = new Store(stateReducer, initialState: new ReduxState());
+  final Store store = new Store(stateReducer,
+      initialState: new ReduxState(
+          firebaseUser: null,
+          mainReference: null,
+          entries: new List(),
+          hasEntryBeenAdded: false),
+      middleware: [firebaseMiddleware].toList());
 
   @override
   Widget build(BuildContext context) {
-    store.dispatch(new InitAction(
-      onEntryAddedCallback: (event) => store.dispatch(new OnAddedAction(event)),
-      onEntryEditedCallback: (event) =>
-          store.dispatch(new OnChangedAction(event)),
-    ));
+    store.dispatch(new InitAction());
     return new MaterialApp(
       title: 'Weight Tracker',
       theme: new ThemeData(

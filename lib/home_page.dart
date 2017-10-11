@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:meta/meta.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/weight_entry_dialog.dart';
@@ -13,15 +15,22 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => new _HomePageState();
 }
 
+@immutable
 class HomePageViewModel {
   //fields
-  bool hasEntryBeenAdded;
-  List<WeightEntry> entries;
+  final bool hasEntryBeenAdded;
+  final List<WeightEntry> entries;
 
   //functions
   var acceptEntryAddedCallback;
   var editEntryCallback;
   var addEntryCallback;
+
+  HomePageViewModel({this.hasEntryBeenAdded,
+    this.entries,
+    this.acceptEntryAddedCallback,
+    this.editEntryCallback,
+    this.addEntryCallback});
 }
 
 class _HomePageState extends State<HomePage> {
@@ -31,15 +40,16 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, HomePageViewModel>(
       converter: (store) {
-        return new HomePageViewModel()
-          ..hasEntryBeenAdded = store.state.hasEntryBeenAdded
-          ..entries = store.state.entries
-          ..acceptEntryAddedCallback =
-          (() => store.dispatch(new AcceptEntryAddedAction()))
-          ..addEntryCallback =
-          ((entry) => store.dispatch(new LocalAddAction(entry)))
-          ..editEntryCallback =
-          ((entry) => store.dispatch(new LocalEditAction(entry)));
+        return new HomePageViewModel(
+          hasEntryBeenAdded: store.state.hasEntryBeenAdded,
+          entries: store.state.entries,
+          acceptEntryAddedCallback: (() =>
+              store.dispatch(new AcceptEntryAddedAction())),
+          addEntryCallback: ((entry) =>
+              store.dispatch(new LocalAddAction(entry))),
+          editEntryCallback: ((entry) =>
+              store.dispatch(new LocalEditAction(entry))),
+        );
       },
       builder: (context, viewModel) {
         if (viewModel.hasEntryBeenAdded) {
