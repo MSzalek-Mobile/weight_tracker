@@ -43,9 +43,9 @@ firebaseMiddleware(Store<ReduxState> store, action, NextDispatcher next) {
         }
       });
     }
-  } else if (action is LocalAddAction) {
+  } else if (action is AddEntryAction) {
     store.state.mainReference.push().set(action.weightEntry.toJson());
-  } else if (action is LocalEditAction) {
+  } else if (action is EditEntryAction) {
     store.state.mainReference
         .child(action.weightEntry.key)
         .set(action.weightEntry.toJson());

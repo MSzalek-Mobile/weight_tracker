@@ -22,9 +22,9 @@ class HomePageViewModel {
   final List<WeightEntry> entries;
 
   //functions
-  var acceptEntryAddedCallback;
-  var editEntryCallback;
-  var addEntryCallback;
+  final Function() acceptEntryAddedCallback;
+  final Function(WeightEntry) editEntryCallback;
+  final Function(WeightEntry) addEntryCallback;
 
   HomePageViewModel({this.hasEntryBeenAdded,
     this.entries,
@@ -46,9 +46,9 @@ class _HomePageState extends State<HomePage> {
           acceptEntryAddedCallback: (() =>
               store.dispatch(new AcceptEntryAddedAction())),
           addEntryCallback: ((entry) =>
-              store.dispatch(new LocalAddAction(entry))),
+              store.dispatch(new AddEntryAction(entry))),
           editEntryCallback: ((entry) =>
-              store.dispatch(new LocalEditAction(entry))),
+              store.dispatch(new EditEntryAction(entry))),
         );
       },
       builder: (context, viewModel) {
@@ -91,7 +91,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _openEditEntryDialog(WeightEntry weightEntry, onSubmittedCallback) async {
+  _openEditEntryDialog(WeightEntry weightEntry,
+      Function(WeightEntry) onSubmittedCallback) async {
     Navigator
         .of(context)
         .push(
@@ -110,7 +111,8 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _openAddEntryDialog(List<WeightEntry> entries, onSubmittedCallback) async {
+  _openAddEntryDialog(List<WeightEntry> entries,
+      Function(WeightEntry) onSubmittedCallback) async {
     WeightEntry entry =
     await Navigator.of(context).push(new MaterialPageRoute<WeightEntry>(
         builder: (BuildContext context) {

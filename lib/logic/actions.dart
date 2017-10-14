@@ -14,16 +14,16 @@ class AddDatabaseReferenceAction {
   AddDatabaseReferenceAction(this.databaseReference);
 }
 
-class LocalAddAction {
+class AddEntryAction {
   final WeightEntry weightEntry;
 
-  LocalAddAction(this.weightEntry);
+  AddEntryAction(this.weightEntry);
 }
 
-class LocalEditAction {
+class EditEntryAction {
   final WeightEntry weightEntry;
 
-  LocalEditAction(this.weightEntry);
+  EditEntryAction(this.weightEntry);
 }
 
 class OnAddedAction {
