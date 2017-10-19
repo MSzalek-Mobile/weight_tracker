@@ -84,23 +84,25 @@ ReduxState stateReducer(ReduxState state, action) {
 }
 
 ReduxState _onEntryAdded(ReduxState state, Event event) {
+  List<WeightEntry> entries = []
+    ..addAll(state.entries)
+    ..add(new WeightEntry.fromSnapshot(event.snapshot))
+    ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
   return state.copyWith(
     hasEntryBeenAdded: true,
-    entries: <WeightEntry>[]
-      ..addAll(state.entries)
-      ..add(new WeightEntry.fromSnapshot(event.snapshot))
-      ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime)),
+    entries: entries,
   );
 }
 
 ReduxState _onEntryEdited(ReduxState state, Event event) {
   var oldValue =
       state.entries.singleWhere((entry) => entry.key == event.snapshot.key);
+  List<WeightEntry> entries = <WeightEntry>[]
+    ..addAll(state.entries)
+    ..[state.entries.indexOf(oldValue)] =
+    new WeightEntry.fromSnapshot(event.snapshot)
+    ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
   return state.copyWith(
-    entries: <WeightEntry>[]
-      ..addAll(state.entries)
-      ..[state.entries.indexOf(oldValue)] =
-      new WeightEntry.fromSnapshot(event.snapshot)
-      ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime)),
+    entries: entries,
   );
 }
