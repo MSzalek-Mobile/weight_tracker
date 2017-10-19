@@ -153,7 +153,7 @@ class DateTimeItem extends StatelessWidget {
           onTap: (() => _showTimePicker(context)),
           child: new Padding(
               padding: new EdgeInsets.symmetric(vertical: 8.0),
-              child: new Text('$time')),
+              child: new Text(time.format(context))),
         ),
       ],
     );

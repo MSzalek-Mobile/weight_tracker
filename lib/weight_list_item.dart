@@ -28,8 +28,8 @@ class WeightListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      new TimeOfDay.fromDateTime(weightEntry.dateTime)
-                          .toString(),
+                      new TimeOfDay.fromDateTime(weightEntry.dateTime).format(
+                          context),
                       textScaleFactor: 0.8,
                       textAlign: TextAlign.right,
                       style: new TextStyle(
