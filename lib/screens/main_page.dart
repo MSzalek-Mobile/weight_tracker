@@ -30,18 +30,22 @@ class MainPage extends StatefulWidget {
   }
 }
 
-class MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin {
   ScrollController _scrollViewController;
+  TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _scrollViewController = new ScrollController();
+    _tabController = new TabController(vsync: this, length: 2);
   }
 
   @override
   void dispose() {
     _scrollViewController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -65,47 +69,48 @@ class MainPageState extends State<MainPage> {
           _scrollToTop();
           viewModel.acceptEntryAddedCallback();
         }
-        return new DefaultTabController(
-          length: 2,
-          child: new Scaffold(
-            body: new NestedScrollView(
-              controller: _scrollViewController,
-              headerSliverBuilder:
-                  (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  new SliverAppBar(
-                    title: new Text(widget.title),
-                    pinned: true,
-                    floating: true,
-                    forceElevated: innerBoxIsScrolled,
-                    bottom: new TabBar(
-                      tabs: <Tab>[
-                        new Tab(
-                          text: "STATISTICS",
-                          icon: new Icon(Icons.show_chart),
-                        ),
-                        new Tab(
-                          text: "HISTORY",
-                          icon: new Icon(Icons.history),
-                        ),
-                      ],
-                    ),
+        return new Scaffold(
+          body: new NestedScrollView(
+            controller: _scrollViewController,
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                new SliverAppBar(
+                  title: new Text(widget.title),
+                  pinned: true,
+                  floating: true,
+                  forceElevated: innerBoxIsScrolled,
+                  bottom: new TabBar(
+                    tabs: <Tab>[
+                      new Tab(
+                        text: "STATISTICS",
+                        icon: new Icon(Icons.show_chart),
+                      ),
+                      new Tab(
+                        text: "HISTORY",
+                        icon: new Icon(Icons.history),
+                      ),
+                    ],
+                    controller: _tabController,
                   ),
-                ];
-              },
-              body: new TabBarView(
-                children: <Widget>[
-                  new StatisticsPage(),
-                  new HistoryPage(),
-                ],
-              ),
+                ),
+              ];
+            },
+            body: new TabBarView(
+              children: <Widget>[
+                new StatisticsPage(),
+                new HistoryPage(),
+              ],
+              controller: _tabController,
             ),
-            floatingActionButton: new FloatingActionButton(
-              onPressed: () => _openAddEntryDialog(
-                  viewModel.defaultWeight, context, viewModel.addEntryCallback),
-              tooltip: 'Add new weight entry',
-              child: new Icon(Icons.add),
-            ),
+          ),
+          floatingActionButton: new FloatingActionButton(
+            onPressed: () =>
+                _openAddEntryDialog(
+                    viewModel.defaultWeight, context,
+                    viewModel.addEntryCallback),
+            tooltip: 'Add new weight entry',
+            child: new Icon(Icons.add),
           ),
         );
       },
