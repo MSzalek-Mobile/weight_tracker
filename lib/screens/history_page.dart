@@ -5,7 +5,7 @@ import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/screens/weight_entry_dialog.dart';
-import 'package:weight_tracker/weight_list_item.dart';
+import 'package:weight_tracker/widgets/weight_list_item.dart';
 
 @immutable
 class HistoryPageViewModel {
