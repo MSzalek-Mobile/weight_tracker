@@ -9,6 +9,7 @@ dependencies:
   firebase_database: 0.0.12
   redux: ">=2.0.0 <3.0.0"
   flutter_redux: 0.3.1
+  tuple: "^1.0.1"
 
 
 flutter:
