@@ -20,10 +20,75 @@ class ProgressChart extends StatelessWidget {
   }
 
   List<WeightEntry> _prepareEntryList(List<WeightEntry> initialEntries) {
+    DateTime beginningDate = _getStartDateOfChart();
     List<WeightEntry> entries = initialEntries
-        .where((entry) => entry.dateTime.isAfter(_getStartDateOfChart()))
+        .where((entry) => entry.dateTime.isAfter(beginningDate))
         .toList();
+    if (_isMissingEntryFromBeginningDate(beginningDate, entries) &&
+        _isAnyEntryBeforeBeginningDate(beginningDate, initialEntries)) {
+      _addFakeEntryOnTheChartBeginning(initialEntries, entries, beginningDate);
+    }
     return entries;
+  }
+
+  /// Adds missing entry at the start of a chart.
+  ///
+  /// If user has not put entry on the date which is first date of a chart,
+  /// it takes last known weight before that date and estimates linearly weight on the beginning date.
+  /// Then it creates and adds fake [WeightEntry] with that weight and date.
+  void _addFakeEntryOnTheChartBeginning(List<WeightEntry> initialEntries,
+      List<WeightEntry> entries, DateTime beginningDate) {
+    List<WeightEntry> entriesNotInChart =
+    initialEntries.where((entry) => !entries.contains(entry)).toList();
+    WeightEntry firstEntryAfterBeginning = entries.last;
+    WeightEntry lastEntryBeforeBeginning = entriesNotInChart.first;
+    WeightEntry fakeEntry = new WeightEntry(
+        beginningDate,
+        _calculateWeightOnBeginningDate(
+            lastEntryBeforeBeginning, firstEntryAfterBeginning, beginningDate),
+        null);
+    entries.add(fakeEntry);
+  }
+
+  bool _isMissingEntryFromBeginningDate(DateTime beginningDate,
+      List<WeightEntry> entries) {
+    return !entries.any((entry) =>
+    entry.dateTime.day == beginningDate.day &&
+        entry.dateTime.month == beginningDate.month &&
+        entry.dateTime.year == beginningDate.year);
+  }
+
+  bool _isAnyEntryBeforeBeginningDate(DateTime beginningDate,
+      List<WeightEntry> entries) {
+    return entries.any((entry) => entry.dateTime.isBefore(beginningDate));
+  }
+
+  double _calculateWeightOnBeginningDate(WeightEntry lastEntryBeforeBeginning,
+      WeightEntry firstEntryAfterBeginning, DateTime beginningDate) {
+    DateTime firstEntryDateTime =
+    _copyDateWithoutTime(firstEntryAfterBeginning.dateTime);
+    DateTime lastEntryDateTime =
+    _copyDateWithoutTime(lastEntryBeforeBeginning.dateTime);
+
+    int differenceInDays =
+        firstEntryDateTime
+            .difference(lastEntryDateTime)
+            .inDays;
+    double differenceInWeight =
+        firstEntryAfterBeginning.weight - lastEntryBeforeBeginning.weight;
+    int differenceInDaysFromBeginning =
+        beginningDate
+            .difference(lastEntryDateTime)
+            .inDays;
+    double weightChangeFromLastEntry =
+        (differenceInWeight * differenceInDaysFromBeginning) / differenceInDays;
+    double estimatedWeight =
+        lastEntryBeforeBeginning.weight + weightChangeFromLastEntry;
+    return estimatedWeight;
+  }
+
+  DateTime _copyDateWithoutTime(DateTime dateTime) {
+    return new DateTime.utc(dateTime.year, dateTime.month, dateTime.day);
   }
 }
 
