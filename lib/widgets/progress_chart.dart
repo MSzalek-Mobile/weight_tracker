@@ -7,6 +7,7 @@ import 'package:tuple/tuple.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 class ProgressChart extends StatelessWidget {
+  static const int NUMBER_OF_DAYS = 31;
   final List<WeightEntry> entries;
 
   ProgressChart(this.entries);
@@ -14,11 +15,15 @@ class ProgressChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new CustomPaint(
-      painter: new ChartPainter(entries
-          .where((entry) => entry.dateTime
-              .isAfter(new DateTime.now().subtract(new Duration(days: 31))))
-          .toList()),
+      painter: new ChartPainter(_prepareEntryList(entries)),
     );
+  }
+
+  List<WeightEntry> _prepareEntryList(List<WeightEntry> initialEntries) {
+    List<WeightEntry> entries = initialEntries
+        .where((entry) => entry.dateTime.isAfter(_getStartDateOfChart()))
+        .toList();
+    return entries;
   }
 }
 
@@ -33,7 +38,6 @@ class ChartPainter extends CustomPainter {
   double drawingHeight;
 
   static const int NUMBER_OF_HORIZONTAL_LINES = 5;
-  static const int NUMBER_OF_DAYS = 31;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -41,23 +45,28 @@ class ChartPainter extends CustomPainter {
     topOffsetEnd = size.height * 0.9;
     drawingWidth = size.width * 0.95;
     drawingHeight = topOffsetEnd;
-    //entries.removeWhere((entry) => entries.any((entry1) => entry1.dateTime.))
 
-    Tuple2<int, int> borderLineValues = _getMinAndMaxValues(entries);
+    if (entries.isNotEmpty) {
+      Tuple2<int, int> borderLineValues = _getMinAndMaxValues(entries);
+      _drawHorizontalLinesAndLabels(
+          canvas, size, borderLineValues.item1, borderLineValues.item2);
+      _drawBottomLabels(canvas, size);
 
-    _drawHorizontalLinesAndLabels(
-        canvas, size, borderLineValues.item1, borderLineValues.item2);
-    _drawBottomLabels(canvas, size);
-
-    _drawLines(canvas, borderLineValues.item1, borderLineValues.item2);
+      _drawLines(canvas, borderLineValues.item1, borderLineValues.item2);
+    } else {
+      //TODO: I think it should be handled at higher level
+    }
   }
 
+  @override
+  bool shouldRepaint(ChartPainter old) => true;
+
+  ///draws actual chart
   void _drawLines(ui.Canvas canvas, int minLineValue, int maxLineValue) {
     final paint = new Paint()
       ..color = Colors.blue[400]
       ..strokeWidth = 3.0;
-    DateTime beginningOfChart =
-    new DateTime.now().subtract(new Duration(days: NUMBER_OF_DAYS));
+    DateTime beginningOfChart = _getStartDateOfChart();
     for (int i = 0; i < entries.length - 1; i++) {
       Offset startEntryOffset = _getEntryOffset(
           entries[i], beginningOfChart, minLineValue, maxLineValue);
@@ -73,24 +82,45 @@ class ChartPainter extends CustomPainter {
         paint);
   }
 
-  @override
-  bool shouldRepaint(ChartPainter old) => true;
-
+  /// Draws horizontal lines and labels informing about weight values attached to those lines
   void _drawHorizontalLinesAndLabels(Canvas canvas, Size size, int minLineValue,
       int maxLineValue) {
     final paint = new Paint()
       ..color = Colors.grey[300];
-    int lineStep =
-        (maxLineValue - minLineValue) ~/ (NUMBER_OF_HORIZONTAL_LINES - 1);
-    double offsetStep = drawingHeight / (NUMBER_OF_HORIZONTAL_LINES - 1);
+    int lineStep = _calculateHorizontalLineStep(maxLineValue, minLineValue);
+    double offsetStep = _calculateHorizontalOffsetStep;
     for (int line = 0; line < NUMBER_OF_HORIZONTAL_LINES; line++) {
       double yOffset = line * offsetStep;
-      ui.Paragraph paragraph =
-      _buildParagraphForLeftLabel(maxLineValue, line, lineStep);
-      canvas.drawParagraph(paragraph, new Offset(0.0, yOffset));
-      canvas.drawLine(new Offset(leftOffsetStart, 5 + yOffset),
-          new Offset(size.width, 5 + yOffset), paint);
+      _drawHorizontalLabel(maxLineValue, line, lineStep, canvas, yOffset);
+      _drawHorizontalLine(canvas, yOffset, size, paint);
     }
+  }
+
+  void _drawHorizontalLine(ui.Canvas canvas, double yOffset, ui.Size size,
+      ui.Paint paint) {
+    canvas.drawLine(new Offset(leftOffsetStart, 5 + yOffset),
+        new Offset(size.width, 5 + yOffset), paint);
+  }
+
+  void _drawHorizontalLabel(int maxLineValue, int line, int lineStep,
+      ui.Canvas canvas, double yOffset) {
+    ui.Paragraph paragraph =
+    _buildParagraphForLeftLabel(maxLineValue, line, lineStep);
+    canvas.drawParagraph(paragraph, new Offset(0.0, yOffset));
+  }
+
+  /// Calculates offset difference between horizontal lines.
+  ///
+  /// e.g. between every line should be 100px space.
+  double get _calculateHorizontalOffsetStep {
+    return drawingHeight / (NUMBER_OF_HORIZONTAL_LINES - 1);
+  }
+
+  /// Calculates weight difference between horizontal lines.
+  ///
+  /// e.g. every line should increment weight by 5
+  int _calculateHorizontalLineStep(int maxLineValue, int minLineValue) {
+    return (maxLineValue - minLineValue) ~/ (NUMBER_OF_HORIZONTAL_LINES - 1);
   }
 
   void _drawBottomLabels(Canvas canvas, Size size) {
@@ -102,6 +132,7 @@ class ChartPainter extends CustomPainter {
     }
   }
 
+  ///Builds paragraph for label placed on the bottom (dates)
   ui.Paragraph _buildParagraphForBottomLabel(int line) {
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
         new ui.ParagraphStyle(fontSize: 10.0, textAlign: TextAlign.right))
@@ -113,6 +144,7 @@ class ChartPainter extends CustomPainter {
     return paragraph;
   }
 
+  ///Builds text paragraph for label placed on the left side of a chart (weights)
   ui.Paragraph _buildParagraphForLeftLabel(int maxLineValue, int line,
       int lineStep) {
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
@@ -128,6 +160,7 @@ class ChartPainter extends CustomPainter {
     return paragraph;
   }
 
+  ///Produces minimal and maximal value of horizontal line that will be displayed
   Tuple2<int, int> _getMinAndMaxValues(List<WeightEntry> entries) {
     double maxWeight = entries.map((entry) => entry.weight).reduce(math.max);
     double minWeight = entries.map((entry) => entry.weight).reduce(math.min);
@@ -144,16 +177,26 @@ class ChartPainter extends CustomPainter {
     return new Tuple2(minLineValue, maxLineValue);
   }
 
+  /// Calculates offset at which given entry should be painted
   Offset _getEntryOffset(WeightEntry entry, DateTime beginningOfChart,
       int minLineValue, int maxLineValue) {
     int daysFromBeginning = entry.dateTime
         .difference(beginningOfChart)
         .inDays;
     double xOffset = leftOffsetStart +
-        daysFromBeginning / (NUMBER_OF_DAYS - 1) * drawingWidth;
+        daysFromBeginning / (ProgressChart.NUMBER_OF_DAYS - 1) * drawingWidth;
     double relativeYposition =
         (entry.weight - minLineValue) / (maxLineValue - minLineValue);
     double yOffset = 5 + drawingHeight - relativeYposition * drawingHeight;
     return new Offset(xOffset, yOffset);
   }
+}
+
+DateTime _getStartDateOfChart() {
+  DateTime now = new DateTime.now();
+  DateTime beginningOfChart = now.subtract(new Duration(
+      days: ProgressChart.NUMBER_OF_DAYS,
+      hours: now.hour,
+      minutes: now.minute));
+  return beginningOfChart;
 }
