@@ -189,7 +189,7 @@ class ChartPainter extends CustomPainter {
   }
 
   void _drawBottomLabels(Canvas canvas, Size size) {
-    for (int line = 30; line >= 0; line -= 7) {
+    for (int line = ProgressChart.NUMBER_OF_DAYS - 1; line >= 0; line -= 7) {
       double offsetX = leftOffsetStart + (drawingWidth / 30) * line;
       ui.Paragraph paragraph = _buildParagraphForBottomLabel(line);
       canvas.drawParagraph(
@@ -249,7 +249,7 @@ class ChartPainter extends CustomPainter {
         .difference(beginningOfChart)
         .inDays;
     double xOffset = leftOffsetStart +
-        daysFromBeginning / (ProgressChart.NUMBER_OF_DAYS - 1) * drawingWidth;
+        daysFromBeginning / (ProgressChart.NUMBER_OF_DAYS) * drawingWidth;
     double relativeYposition =
         (entry.weight - minLineValue) / (maxLineValue - minLineValue);
     double yOffset = 5 + drawingHeight - relativeYposition * drawingHeight;
