@@ -163,15 +163,21 @@ class ChartPainter extends CustomPainter {
 
   void _drawHorizontalLine(ui.Canvas canvas, double yOffset, ui.Size size,
       ui.Paint paint) {
-    canvas.drawLine(new Offset(leftOffsetStart, 5 + yOffset),
-        new Offset(size.width, 5 + yOffset), paint);
+    canvas.drawLine(
+      new Offset(leftOffsetStart, 5 + yOffset),
+      new Offset(size.width, 5 + yOffset),
+      paint,
+    );
   }
 
   void _drawHorizontalLabel(int maxLineValue, int line, int lineStep,
       ui.Canvas canvas, double yOffset) {
     ui.Paragraph paragraph =
     _buildParagraphForLeftLabel(maxLineValue, line, lineStep);
-    canvas.drawParagraph(paragraph, new Offset(0.0, yOffset));
+    canvas.drawParagraph(
+      paragraph,
+      new Offset(0.0, yOffset),
+    );
   }
 
   /// Calculates offset difference between horizontal lines.
@@ -189,21 +195,26 @@ class ChartPainter extends CustomPainter {
   }
 
   void _drawBottomLabels(Canvas canvas, Size size) {
-    for (int line = ProgressChart.NUMBER_OF_DAYS - 1; line >= 0; line -= 7) {
-      double offsetX = leftOffsetStart + (drawingWidth / 30) * line;
-      ui.Paragraph paragraph = _buildParagraphForBottomLabel(line);
+    for (int daysFromStart = ProgressChart.NUMBER_OF_DAYS;
+    daysFromStart >= 0;
+    daysFromStart -= 7) {
+      double offsetXbyDay = drawingWidth / (ProgressChart.NUMBER_OF_DAYS);
+      double offsetX = leftOffsetStart + offsetXbyDay * daysFromStart;
+      ui.Paragraph paragraph = _buildParagraphForBottomLabel(daysFromStart);
       canvas.drawParagraph(
-          paragraph, new Offset(offsetX - 50.0, 10.0 + drawingHeight));
+        paragraph,
+        new Offset(offsetX - 50.0, 10.0 + drawingHeight),
+      );
     }
   }
 
   ///Builds paragraph for label placed on the bottom (dates)
-  ui.Paragraph _buildParagraphForBottomLabel(int line) {
+  ui.Paragraph _buildParagraphForBottomLabel(int daysFromStart) {
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
         new ui.ParagraphStyle(fontSize: 10.0, textAlign: TextAlign.right))
       ..pushStyle(new ui.TextStyle(color: Colors.black))
-      ..addText(new DateFormat('d MMM')
-          .format(new DateTime.now().subtract(new Duration(days: 30 - line))));
+      ..addText(new DateFormat('d MMM').format(new DateTime.now().subtract(
+          new Duration(days: ProgressChart.NUMBER_OF_DAYS - daysFromStart))));
     final ui.Paragraph paragraph = builder.build()
       ..layout(new ui.ParagraphConstraints(width: 50.0));
     return paragraph;
@@ -248,8 +259,8 @@ class ChartPainter extends CustomPainter {
     int daysFromBeginning = entry.dateTime
         .difference(beginningOfChart)
         .inDays;
-    double xOffset = leftOffsetStart +
-        daysFromBeginning / (ProgressChart.NUMBER_OF_DAYS) * drawingWidth;
+    double relativeXposition = daysFromBeginning / ProgressChart.NUMBER_OF_DAYS;
+    double xOffset = leftOffsetStart + relativeXposition * drawingWidth;
     double relativeYposition =
         (entry.weight - minLineValue) / (maxLineValue - minLineValue);
     double yOffset = 5 + drawingHeight - relativeYposition * drawingHeight;
