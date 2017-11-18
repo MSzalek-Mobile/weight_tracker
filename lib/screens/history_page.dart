@@ -37,22 +37,27 @@ class HistoryPage extends StatelessWidget {
         );
       },
       builder: (context, viewModel) {
-        return new ListView.builder(
-          shrinkWrap: true,
-          itemCount: viewModel.entries.length,
-          itemBuilder: (buildContext, index) {
-            //calculating difference
-            double difference = index == viewModel.entries.length - 1
-                ? 0.0
-                : viewModel.entries[index].weight -
-                    viewModel.entries[index + 1].weight;
-            return new InkWell(
-                onTap: () => _openEditEntryDialog(viewModel.entries[index],
-                    context, viewModel.editEntryCallback),
-                child:
-                    new WeightListItem(viewModel.entries[index], difference));
-          },
-        );
+        if (viewModel.entries.isEmpty) {
+          return new Center(child: new Text("Add your weight to see history"),);
+        } else {
+          return new ListView.builder(
+            shrinkWrap: true,
+            itemCount: viewModel.entries.length,
+            itemBuilder: (buildContext, index) {
+              //calculating difference
+              double difference = index == viewModel.entries.length - 1
+                  ? 0.0
+                  : viewModel.entries[index].weight -
+                  viewModel.entries[index + 1].weight;
+              return new InkWell(
+                  onTap: () =>
+                      _openEditEntryDialog(viewModel.entries[index],
+                          context, viewModel.editEntryCallback),
+                  child:
+                  new WeightListItem(viewModel.entries[index], difference));
+            },
+          );
+        }
       },
     );
   }

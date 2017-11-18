@@ -111,15 +111,16 @@ class ChartPainter extends CustomPainter {
     drawingWidth = size.width * 0.95;
     drawingHeight = topOffsetEnd;
 
-    if (entries.isNotEmpty) {
+    if (entries.isEmpty) {
+      _drawParagraphInsteadOfChart(
+          canvas, size, "Add your weight to see history");
+    } else {
       Tuple2<int, int> borderLineValues = _getMinAndMaxValues(entries);
       _drawHorizontalLinesAndLabels(
           canvas, size, borderLineValues.item1, borderLineValues.item2);
       _drawBottomLabels(canvas, size);
 
       _drawLines(canvas, borderLineValues.item1, borderLineValues.item2);
-    } else {
-      //TODO: I think it should be handled at higher level
     }
   }
 
@@ -241,15 +242,22 @@ class ChartPainter extends CustomPainter {
     double maxWeight = entries.map((entry) => entry.weight).reduce(math.max);
     double minWeight = entries.map((entry) => entry.weight).reduce(math.min);
 
-    int maxLineValue = maxWeight.ceil();
-    int difference = maxLineValue - minWeight.floor();
-    int toSubtract = (NUMBER_OF_HORIZONTAL_LINES - 1) -
-        (difference % (NUMBER_OF_HORIZONTAL_LINES - 1));
-    if (toSubtract == NUMBER_OF_HORIZONTAL_LINES - 1) {
-      toSubtract = 0;
-    }
-    int minLineValue = minWeight.floor() - toSubtract;
+    int maxLineValue;
+    int minLineValue;
 
+    if (maxWeight == minWeight) {
+      maxLineValue = maxWeight.ceil() + 1;
+      minLineValue = maxLineValue - 4;
+    } else {
+      maxLineValue = maxWeight.ceil();
+      int difference = maxLineValue - minWeight.floor();
+      int toSubtract = (NUMBER_OF_HORIZONTAL_LINES - 1) -
+          (difference % (NUMBER_OF_HORIZONTAL_LINES - 1));
+      if (toSubtract == NUMBER_OF_HORIZONTAL_LINES - 1) {
+        toSubtract = 0;
+      }
+      minLineValue = minWeight.floor() - toSubtract;
+    }
     return new Tuple2(minLineValue, maxLineValue);
   }
 
@@ -265,6 +273,23 @@ class ChartPainter extends CustomPainter {
         (entry.weight - minLineValue) / (maxLineValue - minLineValue);
     double yOffset = 5 + drawingHeight - relativeYposition * drawingHeight;
     return new Offset(xOffset, yOffset);
+  }
+
+  _drawParagraphInsteadOfChart(ui.Canvas canvas, ui.Size size, String text) {
+    double fontSize = 14.0;
+    ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+      new ui.ParagraphStyle(
+        fontSize: fontSize,
+        textAlign: TextAlign.center,
+      ),
+    )
+      ..pushStyle(new ui.TextStyle(color: Colors.black))
+      ..addText(text);
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(new ui.ParagraphConstraints(width: size.width));
+
+    canvas.drawParagraph(
+        paragraph, new Offset(0.0, size.height / 2 - fontSize));
   }
 }
 
