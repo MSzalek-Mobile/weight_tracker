@@ -138,7 +138,7 @@ class _StatisticCard extends StatelessWidget {
             child: new Row(
               children: [
                 new Text(
-                  numberSymbol + value.toString(),
+                  numberSymbol + value.toStringAsFixed(1),
                   textScaleFactor: textSizeFactor,
                   style: Theme
                       .of(context)
