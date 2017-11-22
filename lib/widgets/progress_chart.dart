@@ -24,7 +24,8 @@ class ProgressChart extends StatelessWidget {
     List<WeightEntry> entries = initialEntries
         .where((entry) => entry.dateTime.isAfter(beginningDate))
         .toList();
-    if (_isMissingEntryFromBeginningDate(beginningDate, entries) &&
+    if (entries.isNotEmpty && _isMissingEntryFromBeginningDate(
+        beginningDate, entries) &&
         _isAnyEntryBeforeBeginningDate(beginningDate, initialEntries)) {
       _addFakeEntryOnTheChartBeginning(initialEntries, entries, beginningDate);
     }
@@ -113,7 +114,7 @@ class ChartPainter extends CustomPainter {
 
     if (entries.isEmpty) {
       _drawParagraphInsteadOfChart(
-          canvas, size, "Add your weight to see history");
+          canvas, size, "Add your current weight to see history");
     } else {
       Tuple2<int, int> borderLineValues = _getMinAndMaxValues(entries);
       _drawHorizontalLinesAndLabels(
