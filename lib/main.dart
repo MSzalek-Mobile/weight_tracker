@@ -15,7 +15,9 @@ class MyApp extends StatelessWidget {
           firebaseUser: null,
           mainReference: null,
           entries: new List(),
-          hasEntryBeenAdded: false),
+          hasEntryBeenAdded: false,
+          lastRemovedEntry: null,
+          hasEntryBeenRemoved: false),
       middleware: [firebaseMiddleware].toList());
 
   @override

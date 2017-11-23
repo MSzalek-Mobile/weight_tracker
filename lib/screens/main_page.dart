@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
-import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/screens/history_page.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
 import 'package:weight_tracker/screens/weight_entry_dialog.dart';
@@ -10,14 +9,15 @@ import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 class MainPageViewModel {
   final double defaultWeight;
   final bool hasEntryBeenAdded;
-  final Function(WeightEntry) addEntryCallback;
+  final Function(AddEntryAction) addEntryCallback;
   final Function() acceptEntryAddedCallback;
 
-  MainPageViewModel(
-      {this.addEntryCallback,
-      this.defaultWeight,
-      this.hasEntryBeenAdded,
-      this.acceptEntryAddedCallback});
+  MainPageViewModel({
+    this.addEntryCallback,
+    this.defaultWeight,
+    this.hasEntryBeenAdded,
+    this.acceptEntryAddedCallback,
+  });
 }
 
 class MainPage extends StatefulWidget {
@@ -60,8 +60,7 @@ class MainPageState extends State<MainPage>
           hasEntryBeenAdded: store.state.hasEntryBeenAdded,
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
-          addEntryCallback: (entry) =>
-              store.dispatch(new AddEntryAction(entry)),
+          addEntryCallback: (addEntryAction) => store.dispatch(addEntryAction),
         );
       },
       builder: (context, viewModel) {
@@ -118,15 +117,14 @@ class MainPageState extends State<MainPage>
   }
 
   _openAddEntryDialog(double defaultWeight, BuildContext context,
-      Function(WeightEntry) onSubmittedCallback) async {
-    WeightEntry entry =
-        await Navigator.of(context).push(new MaterialPageRoute<WeightEntry>(
-            builder: (BuildContext context) {
-              return new WeightEntryDialog.add(defaultWeight);
-            },
-            fullscreenDialog: true));
-    if (entry != null) {
-      onSubmittedCallback(entry);
+      Function(AddEntryAction) addEntryCallback) async {
+    var result = await Navigator.of(context).push(new MaterialPageRoute(
+        builder: (BuildContext context) {
+          return new WeightEntryDialog.add(defaultWeight);
+        },
+        fullscreenDialog: true));
+    if (result != null && result is AddEntryAction) {
+      addEntryCallback(result);
     }
   }
 

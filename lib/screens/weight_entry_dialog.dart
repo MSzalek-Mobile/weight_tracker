@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 class WeightEntryDialog extends StatefulWidget {
@@ -36,16 +37,30 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
   WeightEntryDialogState(this._dateTime, this._weight, this._note);
 
   Widget _createAppBar(BuildContext context) {
+    bool isInEditMode = widget.weighEntryToEdit != null;
+
     return new AppBar(
-      title: widget.weighEntryToEdit == null
-          ? const Text("New entry")
-          : const Text("Edit entry"),
+      title: isInEditMode ? const Text("Edit entry") : const Text("New entry"),
       actions: [
+        isInEditMode ? new FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop(
+                new RemoveEntryAction(widget.weighEntryToEdit));
+          },
+          child: new Text('DELETE',
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .subhead
+                  .copyWith(color: Colors.white)),
+        ) : new Container(),
         new FlatButton(
           onPressed: () {
-            Navigator
-                .of(context)
-                .pop(new WeightEntry(_dateTime, _weight, _note));
+            WeightEntry entry = new WeightEntry(_dateTime, _weight, _note);
+            var returnedAction = isInEditMode
+                ? new EditEntryAction(entry)
+                : new AddEntryAction(entry);
+            Navigator.of(context).pop(returnedAction);
           },
           child: new Text('SAVE',
               style: Theme
@@ -57,7 +72,6 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
       ],
     );
   }
-
 
   @override
   void initState() {

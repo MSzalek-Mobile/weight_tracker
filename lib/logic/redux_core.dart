@@ -10,22 +10,30 @@ class ReduxState {
   final FirebaseUser firebaseUser;
   final DatabaseReference mainReference;
   final List<WeightEntry> entries;
-  final bool hasEntryBeenAdded;
+  final bool hasEntryBeenAdded; //in other words: should scroll to top?
+  final WeightEntry lastRemovedEntry;
+  final bool hasEntryBeenRemoved; //in other words: should show snackbar?
 
   ReduxState({this.firebaseUser,
     this.mainReference,
     this.entries,
-    this.hasEntryBeenAdded});
+    this.hasEntryBeenAdded,
+    this.lastRemovedEntry,
+    this.hasEntryBeenRemoved});
 
   ReduxState copyWith({FirebaseUser firebaseUser,
     DatabaseReference mainReference,
     List<WeightEntry> entries,
-    bool hasEntryBeenAdded}) {
+    bool hasEntryBeenAdded,
+    WeightEntry lastRemovedEntry,
+    bool hasEntryBeenRemoved}) {
     return new ReduxState(
         firebaseUser: firebaseUser ?? this.firebaseUser,
         mainReference: mainReference ?? this.mainReference,
         entries: entries ?? this.entries,
-        hasEntryBeenAdded: hasEntryBeenAdded ?? this.hasEntryBeenAdded);
+        hasEntryBeenAdded: hasEntryBeenAdded ?? this.hasEntryBeenAdded,
+        lastRemovedEntry: lastRemovedEntry ?? this.lastRemovedEntry,
+        hasEntryBeenRemoved: hasEntryBeenRemoved ?? this.hasEntryBeenRemoved);
   }
 }
 
@@ -49,6 +57,13 @@ firebaseMiddleware(Store<ReduxState> store, action, NextDispatcher next) {
     store.state.mainReference
         .child(action.weightEntry.key)
         .set(action.weightEntry.toJson());
+  } else if (action is RemoveEntryAction) {
+    store.state.mainReference.child(action.weightEntry.key).remove();
+  } else if (action is UndoRemovalAction) {
+    WeightEntry lastRemovedEntry = store.state.lastRemovedEntry;
+    store.state.mainReference
+        .child(lastRemovedEntry.key)
+        .set(lastRemovedEntry.toJson());
   }
 
   next(action);
@@ -61,7 +76,9 @@ firebaseMiddleware(Store<ReduxState> store, action, NextDispatcher next) {
       ..onChildAdded
           .listen((event) => store.dispatch(new OnAddedAction(event)))
       ..onChildChanged
-          .listen((event) => store.dispatch(new OnChangedAction(event)))));
+          .listen((event) => store.dispatch(new OnChangedAction(event)))
+      ..onChildRemoved
+          .listen((event) => store.dispatch(new OnRemovedAction(event)))));
   }
 }
 
@@ -77,8 +94,12 @@ ReduxState stateReducer(ReduxState state, action) {
     newState = _onEntryAdded(state, action.event);
   } else if (action is OnChangedAction) {
     newState = _onEntryEdited(state, action.event);
+  } else if (action is OnRemovedAction) {
+    newState = _onEntryRemoved(state, action.event);
   } else if (action is AcceptEntryAddedAction) {
     newState = state.copyWith(hasEntryBeenAdded: false);
+  } else if (action is AcceptEntryRemovalAction) {
+    newState = state.copyWith(hasEntryBeenRemoved: false);
   }
   return newState;
 }
@@ -104,5 +125,19 @@ ReduxState _onEntryEdited(ReduxState state, Event event) {
     ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
   return state.copyWith(
     entries: entries,
+  );
+}
+
+ReduxState _onEntryRemoved(ReduxState state, Event event) {
+  WeightEntry removedEntry =
+  state.entries.singleWhere((entry) => entry.key == event.snapshot.key);
+  List<WeightEntry> entries = <WeightEntry>[]
+    ..addAll(state.entries)
+    ..remove(removedEntry)
+    ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
+  return state.copyWith(
+    entries: entries,
+    lastRemovedEntry: removedEntry,
+    hasEntryBeenRemoved: true,
   );
 }
