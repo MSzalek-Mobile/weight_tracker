@@ -14,7 +14,7 @@ class HistoryPageViewModel {
   //fields
   final List<WeightEntry> entries;
   final bool hasEntryBeenRemoved;
-  final Function() acceptEntryRemovedCallback;
+  final Function() acceptEntryRemoved;
   final Function() undoEntryRemoval;
 
   //functions
@@ -24,7 +24,7 @@ class HistoryPageViewModel {
   HistoryPageViewModel({
     this.undoEntryRemoval,
     this.hasEntryBeenRemoved,
-    this.acceptEntryRemovedCallback,
+    this.acceptEntryRemoved,
     this.entries,
     this.editEntryCallback,
     this.removeEntryCallback,
@@ -44,7 +44,7 @@ class HistoryPage extends StatelessWidget {
           removeEntryCallback: ((removeAction) => store.dispatch(removeAction)),
           editEntryCallback: ((editAction) => store.dispatch(editAction)),
           hasEntryBeenRemoved: store.state.hasEntryBeenRemoved,
-          acceptEntryRemovedCallback: () =>
+          acceptEntryRemoved: () =>
               store.dispatch(new AcceptEntryRemovalAction()),
           undoEntryRemoval: () => store.dispatch(new UndoRemovalAction()),
         );
@@ -53,13 +53,13 @@ class HistoryPage extends StatelessWidget {
         if (viewModel.hasEntryBeenRemoved) {
           new Future<Null>.delayed(Duration.ZERO, () {
             Scaffold.of(context).showSnackBar(new SnackBar(
-              content: new Text("Entry deleted"),
+              content: new Text("Entry deleted."),
               action: new SnackBarAction(
                 label: "UNDO",
                 onPressed: () => viewModel.undoEntryRemoval(),
               ),
             ));
-            viewModel.acceptEntryRemovedCallback();
+            viewModel.acceptEntryRemoved();
           });
         }
         if (viewModel.entries.isEmpty) {
