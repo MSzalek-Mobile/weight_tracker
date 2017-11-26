@@ -26,6 +26,12 @@ class EditEntryAction {
   EditEntryAction(this.weightEntry);
 }
 
+class RemoveEntryAction {
+  final WeightEntry weightEntry;
+
+  RemoveEntryAction(this.weightEntry);
+}
+
 class OnAddedAction {
   final Event event;
 
@@ -38,6 +44,16 @@ class OnChangedAction {
   OnChangedAction(this.event);
 }
 
+class OnRemovedAction {
+  final Event event;
+
+  OnRemovedAction(this.event);
+}
+
 class AcceptEntryAddedAction {}
+
+class AcceptEntryRemovalAction {}
+
+class UndoRemovalAction {}
 
 class InitAction {}
