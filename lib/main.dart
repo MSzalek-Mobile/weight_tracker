@@ -17,20 +17,21 @@ class MyApp extends StatelessWidget {
           entries: new List(),
           hasEntryBeenAdded: false,
           lastRemovedEntry: null,
-          hasEntryBeenRemoved: false),
+          hasEntryBeenRemoved: false,
+          unit: 'kg'),
       middleware: [firebaseMiddleware].toList());
 
   @override
   Widget build(BuildContext context) {
     store.dispatch(new InitAction());
-    return new MaterialApp(
-      title: 'Weight Tracker',
-      theme: new ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      home: new StoreProvider(
-        store: store,
-        child: new MainPage(title: "Weight Tracker"),
+    return new StoreProvider(
+      store: store,
+      child: new MaterialApp(
+        title: 'Weight Tracker',
+        theme: new ThemeData(
+          primarySwatch: Colors.green,
+        ),
+        home: new MainPage(title: "Weight Tracker"),
       ),
     );
   }

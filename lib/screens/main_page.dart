@@ -3,12 +3,14 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_core.dart';
 import 'package:weight_tracker/screens/history_page.dart';
+import 'package:weight_tracker/screens/settings_screen.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
 import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 
 class MainPageViewModel {
   final double defaultWeight;
   final bool hasEntryBeenAdded;
+  final String unit;
   final Function(AddEntryAction) addEntryCallback;
   final Function() acceptEntryAddedCallback;
 
@@ -17,6 +19,7 @@ class MainPageViewModel {
     this.defaultWeight,
     this.hasEntryBeenAdded,
     this.acceptEntryAddedCallback,
+    this.unit,
   });
 }
 
@@ -61,6 +64,7 @@ class MainPageState extends State<MainPage>
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
           addEntryCallback: (addEntryAction) => store.dispatch(addEntryAction),
+          unit: store.state.unit,
         );
       },
       builder: (context, viewModel) {
@@ -92,6 +96,11 @@ class MainPageState extends State<MainPage>
                     ],
                     controller: _tabController,
                   ),
+                  actions: [
+                    new IconButton(
+                        icon: new Icon(Icons.settings),
+                        onPressed: () => _openSettingsPage(context))
+                  ],
                 ),
               ];
             },
@@ -105,9 +114,8 @@ class MainPageState extends State<MainPage>
           ),
           floatingActionButton: new FloatingActionButton(
             onPressed: () =>
-                _openAddEntryDialog(
-                    viewModel.defaultWeight, context,
-                    viewModel.addEntryCallback),
+                _openAddEntryDialog(viewModel.defaultWeight,
+                    viewModel.unit, context, viewModel.addEntryCallback),
             tooltip: 'Add new weight entry',
             child: new Icon(Icons.add),
           ),
@@ -116,11 +124,14 @@ class MainPageState extends State<MainPage>
     );
   }
 
-  _openAddEntryDialog(double defaultWeight, BuildContext context,
+  _openAddEntryDialog(double defaultWeight, String unit, BuildContext context,
       Function(AddEntryAction) addEntryCallback) async {
     var result = await Navigator.of(context).push(new MaterialPageRoute(
         builder: (BuildContext context) {
-          return new WeightEntryDialog.add(defaultWeight);
+          return new WeightEntryDialog.add(
+            initialWeight: defaultWeight,
+            unit: unit,
+          );
         },
         fullscreenDialog: true));
     if (result != null && result is AddEntryAction) {
@@ -134,5 +145,13 @@ class MainPageState extends State<MainPage>
       duration: const Duration(microseconds: 1),
       curve: new ElasticInCurve(0.01),
     );
+  }
+
+  _openSettingsPage(BuildContext context) async {
+    Navigator.of(context).push(new MaterialPageRoute(
+      builder: (BuildContext context) {
+        return new SettingsPage();
+      },
+    ));
   }
 }

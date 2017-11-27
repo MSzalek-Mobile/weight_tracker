@@ -57,3 +57,15 @@ class AcceptEntryRemovalAction {}
 class UndoRemovalAction {}
 
 class InitAction {}
+
+class SetUnitAction {
+  final String unit;
+
+  SetUnitAction(this.unit);
+}
+
+class OnUnitChangedAction {
+  final String unit;
+
+  OnUnitChangedAction(this.unit);
+}

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:meta/meta.dart';
 import 'package:redux/redux.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
@@ -13,33 +16,38 @@ class ReduxState {
   final bool hasEntryBeenAdded; //in other words: should scroll to top?
   final WeightEntry lastRemovedEntry;
   final bool hasEntryBeenRemoved; //in other words: should show snackbar?
+  final String unit;
 
   ReduxState({this.firebaseUser,
     this.mainReference,
     this.entries,
     this.hasEntryBeenAdded,
     this.lastRemovedEntry,
-    this.hasEntryBeenRemoved});
+    this.hasEntryBeenRemoved,
+    this.unit});
 
   ReduxState copyWith({FirebaseUser firebaseUser,
     DatabaseReference mainReference,
     List<WeightEntry> entries,
     bool hasEntryBeenAdded,
     WeightEntry lastRemovedEntry,
-    bool hasEntryBeenRemoved}) {
+    bool hasEntryBeenRemoved,
+    String unit}) {
     return new ReduxState(
         firebaseUser: firebaseUser ?? this.firebaseUser,
         mainReference: mainReference ?? this.mainReference,
         entries: entries ?? this.entries,
         hasEntryBeenAdded: hasEntryBeenAdded ?? this.hasEntryBeenAdded,
         lastRemovedEntry: lastRemovedEntry ?? this.lastRemovedEntry,
-        hasEntryBeenRemoved: hasEntryBeenRemoved ?? this.hasEntryBeenRemoved);
+        hasEntryBeenRemoved: hasEntryBeenRemoved ?? this.hasEntryBeenRemoved,
+        unit: unit ?? this.unit);
   }
 }
 
 firebaseMiddleware(Store<ReduxState> store, action, NextDispatcher next) {
   print(action.runtimeType);
   if (action is InitAction) {
+    _loadUnit().then((unit) => store.dispatch(new OnUnitChangedAction(unit)));
     if (store.state.firebaseUser == null) {
       FirebaseAuth.instance.currentUser().then((user) {
         if (user != null) {
@@ -64,6 +72,9 @@ firebaseMiddleware(Store<ReduxState> store, action, NextDispatcher next) {
     store.state.mainReference
         .child(lastRemovedEntry.key)
         .set(lastRemovedEntry.toJson());
+  } else if (action is SetUnitAction) {
+    _setUnit(action.unit)
+        .then((nil) => store.dispatch(new OnUnitChangedAction(action.unit)));
   }
 
   next(action);
@@ -100,6 +111,8 @@ ReduxState stateReducer(ReduxState state, action) {
     newState = state.copyWith(hasEntryBeenAdded: false);
   } else if (action is AcceptEntryRemovalAction) {
     newState = state.copyWith(hasEntryBeenRemoved: false);
+  } else if (action is OnUnitChangedAction) {
+    newState = state.copyWith(unit: action.unit);
   }
   return newState;
 }
@@ -117,7 +130,7 @@ ReduxState _onEntryAdded(ReduxState state, Event event) {
 
 ReduxState _onEntryEdited(ReduxState state, Event event) {
   var oldValue =
-      state.entries.singleWhere((entry) => entry.key == event.snapshot.key);
+  state.entries.singleWhere((entry) => entry.key == event.snapshot.key);
   List<WeightEntry> entries = <WeightEntry>[]
     ..addAll(state.entries)
     ..[state.entries.indexOf(oldValue)] =
@@ -140,4 +153,14 @@ ReduxState _onEntryRemoved(ReduxState state, Event event) {
     lastRemovedEntry: removedEntry,
     hasEntryBeenRemoved: true,
   );
+}
+
+Future _setUnit(String unit) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString('unit', unit);
+}
+
+Future<String> _loadUnit() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('unit') ?? 'kg';
 }

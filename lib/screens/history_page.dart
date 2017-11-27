@@ -12,6 +12,7 @@ import 'package:weight_tracker/widgets/weight_list_item.dart';
 @immutable
 class HistoryPageViewModel {
   //fields
+  final String unit;
   final List<WeightEntry> entries;
   final bool hasEntryBeenRemoved;
   final Function() acceptEntryRemoved;
@@ -28,6 +29,7 @@ class HistoryPageViewModel {
     this.entries,
     this.editEntryCallback,
     this.removeEntryCallback,
+    this.unit,
   });
 }
 
@@ -47,6 +49,7 @@ class HistoryPage extends StatelessWidget {
           acceptEntryRemoved: () =>
               store.dispatch(new AcceptEntryRemovalAction()),
           undoEntryRemoval: () => store.dispatch(new UndoRemovalAction()),
+          unit: store.state.unit,
         );
       },
       builder: (context, viewModel) {
@@ -80,6 +83,7 @@ class HistoryPage extends StatelessWidget {
                   onTap: () =>
                       _openEditEntryDialog(
                           viewModel.entries[index],
+                          viewModel.unit,
                           context,
                           viewModel.editEntryCallback,
                           viewModel.removeEntryCallback),
@@ -93,6 +97,7 @@ class HistoryPage extends StatelessWidget {
   }
 
   _openEditEntryDialog(WeightEntry weightEntry,
+      String unit,
       BuildContext context,
       Function(EditEntryAction) editEntryCallback,
       Function(RemoveEntryAction) removeEntryCallback) async {
@@ -101,7 +106,8 @@ class HistoryPage extends StatelessWidget {
         .push(
       new MaterialPageRoute(
         builder: (BuildContext context) {
-          return new WeightEntryDialog.edit(weightEntry);
+          return new WeightEntryDialog.edit(
+            weighEntryToEdit: weightEntry, unit: unit,);
         },
         fullscreenDialog: true,
       ),

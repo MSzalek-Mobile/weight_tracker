@@ -11,6 +11,7 @@ dependencies:
   flutter_redux: 0.3.2
   tuple: "^1.0.1"
   intl: 0.15.2
+  shared_preferences: "^0.2.5"
 
 
 flutter:

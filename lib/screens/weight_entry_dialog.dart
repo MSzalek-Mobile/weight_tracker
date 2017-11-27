@@ -10,10 +10,12 @@ import 'package:weight_tracker/model/weight_entry.dart';
 class WeightEntryDialog extends StatefulWidget {
   final double initialWeight;
   final WeightEntry weighEntryToEdit;
+  final String unit;
 
-  WeightEntryDialog.add(this.initialWeight) : weighEntryToEdit = null;
+  WeightEntryDialog.add({this.initialWeight, this.unit})
+      : weighEntryToEdit = null;
 
-  WeightEntryDialog.edit(this.weighEntryToEdit)
+  WeightEntryDialog.edit({this.weighEntryToEdit, this.unit})
       : initialWeight = weighEntryToEdit.weight;
 
   @override
@@ -81,6 +83,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    String unit = widget.unit;
     return new Scaffold(
       appBar: _createAppBar(context),
       body: new Column(
@@ -100,7 +103,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
               width: 24.0,
             ),
             title: new Text(
-              "$_weight kg",
+              "$_weight $unit",
             ),
             onTap: () => _showWeightPicker(context),
           ),
@@ -124,7 +127,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
       context: context,
       child: new NumberPickerDialog.decimal(
         minValue: 1,
-        maxValue: 150,
+        maxValue: 300,
         initialDoubleValue: _weight,
         title: new Text("Enter your weight"),
       ),

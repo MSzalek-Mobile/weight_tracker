@@ -10,12 +10,14 @@ class _StatisticsPageViewModel {
   final double last7daysProgress;
   final double last30daysProgress;
   final List<WeightEntry> entries;
+  final String unit;
 
   _StatisticsPageViewModel({this.last7daysProgress,
     this.last30daysProgress,
     this.totalProgress,
     this.currentWeight,
-    this.entries});
+    this.entries,
+    this.unit});
 }
 
 class StatisticsPage extends StatelessWidget {
@@ -47,24 +49,28 @@ class StatisticsPage extends StatelessWidget {
               : (last30daysEntries.first.weight -
               last30daysEntries.last.weight),
           entries: store.state.entries,
+          unit: store.state.unit,
         );
       },
       builder: (context, viewModel) {
         return new ListView(
           children: <Widget>[
             new _StatisticCardWrapper(
-              child: new Padding(padding: new EdgeInsets.all(8.0),
+              child: new Padding(
+                  padding: new EdgeInsets.all(8.0),
                   child: new ProgressChart(viewModel.entries)),
               height: 200.0,
             ),
             new _StatisticCard(
               title: "Current weight",
               value: viewModel.currentWeight,
+              unit: viewModel.unit,
             ),
             new _StatisticCard(
               title: "Progress done",
               value: viewModel.totalProgress,
               processNumberSymbol: true,
+              unit: viewModel.unit,
             ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -75,6 +81,7 @@ class StatisticsPage extends StatelessWidget {
                     value: viewModel.last7daysProgress,
                     textSizeFactor: 0.8,
                     processNumberSymbol: true,
+                    unit: viewModel.unit,
                   ),
                 ),
                 new Expanded(
@@ -83,6 +90,7 @@ class StatisticsPage extends StatelessWidget {
                     value: viewModel.last30daysProgress,
                     textSizeFactor: 0.8,
                     processNumberSymbol: true,
+                    unit: viewModel.unit,
                   ),
                 ),
               ],
@@ -120,9 +128,11 @@ class _StatisticCard extends StatelessWidget {
   final num value;
   final bool processNumberSymbol;
   final double textSizeFactor;
+  final String unit;
 
   _StatisticCard({this.title,
     this.value,
+    this.unit,
     this.processNumberSymbol = false,
     this.textSizeFactor = 1.0});
 
@@ -148,7 +158,7 @@ class _StatisticCard extends StatelessWidget {
                 ),
                 new Padding(
                     padding: new EdgeInsets.only(left: 5.0),
-                    child: new Text("kg")),
+                    child: new Text(unit)),
               ],
               mainAxisAlignment: MainAxisAlignment.center,
             ),
