@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/constants.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
@@ -12,13 +13,16 @@ class _StatisticsPageViewModel {
   final double last30daysProgress;
   final List<WeightEntry> entries;
   final String unit;
+  final Function() openAddEntryDialog;
 
   _StatisticsPageViewModel({this.last7daysProgress,
     this.last30daysProgress,
     this.totalProgress,
     this.currentWeight,
     this.entries,
-    this.unit});
+    this.unit,
+    this.openAddEntryDialog,
+  });
 }
 
 class StatisticsPage extends StatelessWidget {
@@ -59,16 +63,24 @@ class StatisticsPage extends StatelessWidget {
               last30daysEntries.last.weight),
           entries: entries,
           unit: unit,
+          openAddEntryDialog: () {
+            if (last30daysEntries.isEmpty) {
+              store.dispatch(new OpenAddEntryDialog(context));
+            }
+          },
         );
       },
       builder: (context, viewModel) {
         return new ListView(
           children: <Widget>[
-            new _StatisticCardWrapper(
-              child: new Padding(
-                  padding: new EdgeInsets.all(8.0),
-                  child: new ProgressChart(viewModel.entries)),
-              height: 200.0,
+            new GestureDetector(
+              onTap: viewModel.openAddEntryDialog,
+              child: new _StatisticCardWrapper(
+                child: new Padding(
+                    padding: new EdgeInsets.all(8.0),
+                    child: new ProgressChart(viewModel.entries)),
+                height: 200.0,
+              ),
             ),
             new _StatisticCard(
               title: "Current weight",
