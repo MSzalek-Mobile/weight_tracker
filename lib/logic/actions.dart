@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/widgets.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 class UserLoadedAction {
@@ -68,4 +69,23 @@ class OnUnitChangedAction {
   final String unit;
 
   OnUnitChangedAction(this.unit);
+}
+
+class UpdateActiveWeightEntry {
+  final WeightEntry weightEntry;
+
+  UpdateActiveWeightEntry(this.weightEntry);
+}
+
+class OpenAddEntryDialog {
+  final BuildContext context;
+
+  OpenAddEntryDialog(this.context);
+}
+
+class OpenEditEntryDialog {
+  final BuildContext context;
+  final WeightEntry weightEntry;
+
+  OpenEditEntryDialog(this.context, this.weightEntry);
 }

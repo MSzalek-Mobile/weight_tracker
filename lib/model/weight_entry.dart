@@ -15,6 +15,26 @@ class WeightEntry {
         weight = snapshot.value["weight"].toDouble(),
         note = snapshot.value["note"];
 
+  WeightEntry.copy(WeightEntry weightEntry)
+      : key = weightEntry.key,
+  //copy datetime
+        dateTime = new DateTime.fromMillisecondsSinceEpoch(
+            weightEntry.dateTime.millisecondsSinceEpoch),
+        weight = weightEntry.weight,
+        note = weightEntry.note;
+
+  WeightEntry._internal(this.key, this.dateTime, this.weight, this.note);
+
+  WeightEntry copyWith(String key, DateTime dateTime, double weight,
+      String note) {
+    return new WeightEntry._internal(
+      key ?? this.key,
+      dateTime ?? this.dateTime,
+      weight ?? this.weight,
+      note ?? this.note,
+    );
+  }
+
   toJson() {
     return {
       "weight": weight,

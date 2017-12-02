@@ -23,6 +23,17 @@ ReduxState reduce(ReduxState state, action) {
     newState = state.copyWith(hasEntryBeenRemoved: false);
   } else if (action is OnUnitChangedAction) {
     newState = state.copyWith(unit: action.unit);
+  } else if (action is UpdateActiveWeightEntry) {
+    newState =
+        state.copyWith(activeEntry: new WeightEntry.copy(action.weightEntry));
+  } else if (action is OpenEditEntryDialog) {
+    newState =
+        state.copyWith(activeEntry: action.weightEntry, isEditMode: true);
+  } else if (action is OpenAddEntryDialog) {
+    newState = state.copyWith(
+        activeEntry: new WeightEntry(new DateTime.now(),
+            state.entries.isEmpty ? 70.0 : state.entries.first.weight, null),
+        isEditMode: false);
   }
   return newState;
 }

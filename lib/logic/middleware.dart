@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:redux/redux.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
+import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 
 middleware(Store<ReduxState> store, action, NextDispatcher next) {
   print(action.runtimeType);
@@ -26,7 +28,28 @@ middleware(Store<ReduxState> store, action, NextDispatcher next) {
   next(action);
   if (action is UserLoadedAction) {
     _handleUserLoadedAction(store);
+  } else if (action is OpenAddEntryDialog) {
+    _handleOpenAddEntryDialog(action);
+  } else if (action is OpenEditEntryDialog) {
+    _handleOpenEditEntryDialog(action);
   }
+}
+
+_handleOpenAddEntryDialog(OpenAddEntryDialog action) {
+  _openWeightEntryDialog(action.context);
+}
+
+_handleOpenEditEntryDialog(OpenEditEntryDialog action) {
+  _openWeightEntryDialog(action.context);
+}
+
+_openWeightEntryDialog(BuildContext context) {
+  Navigator.of(context).push(new MaterialPageRoute(
+    builder: (BuildContext context) {
+      return new WeightEntryDialog();
+    },
+    fullscreenDialog: true,
+  ));
 }
 
 _handleUserLoadedAction(Store<ReduxState> store) {

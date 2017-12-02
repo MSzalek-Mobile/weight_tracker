@@ -12,6 +12,7 @@ class ReduxState {
   final WeightEntry lastRemovedEntry;
   final bool hasEntryBeenRemoved; //in other words: should show snackbar?
   final String unit;
+  final bool isEditMode;
   final WeightEntry activeEntry; //entry to show in detail dialog
 
   ReduxState(
@@ -22,7 +23,8 @@ class ReduxState {
       this.lastRemovedEntry,
       this.hasEntryBeenRemoved,
       this.unit,
-      this.activeEntry});
+        this.activeEntry,
+        this.isEditMode});
 
   ReduxState copyWith(
       {FirebaseUser firebaseUser,
@@ -32,7 +34,8 @@ class ReduxState {
       WeightEntry lastRemovedEntry,
       bool hasEntryBeenRemoved,
       String unit,
-      WeightEntry activeEntry}) {
+        WeightEntry activeEntry,
+        bool isEditMode}) {
     return new ReduxState(
         firebaseUser: firebaseUser ?? this.firebaseUser,
         mainReference: mainReference ?? this.mainReference,
@@ -41,6 +44,7 @@ class ReduxState {
         lastRemovedEntry: lastRemovedEntry ?? this.lastRemovedEntry,
         hasEntryBeenRemoved: hasEntryBeenRemoved ?? this.hasEntryBeenRemoved,
         unit: unit ?? this.unit,
-        activeEntry: activeEntry ?? this.activeEntry);
+        activeEntry: activeEntry ?? this.activeEntry,
+        isEditMode: isEditMode ?? this.isEditMode);
   }
 }

@@ -5,17 +5,16 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/history_page.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
-import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 
 class MainPageViewModel {
   final double defaultWeight;
   final bool hasEntryBeenAdded;
   final String unit;
-  final Function(AddEntryAction) addEntryCallback;
+  final Function() addEntryFunction;
   final Function() acceptEntryAddedCallback;
 
   MainPageViewModel({
-    this.addEntryCallback,
+    this.addEntryFunction,
     this.defaultWeight,
     this.hasEntryBeenAdded,
     this.acceptEntryAddedCallback,
@@ -63,7 +62,8 @@ class MainPageState extends State<MainPage>
           hasEntryBeenAdded: store.state.hasEntryBeenAdded,
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
-          addEntryCallback: (addEntryAction) => store.dispatch(addEntryAction),
+          addEntryFunction: () =>
+              store.dispatch(new OpenAddEntryDialog(context)),
           unit: store.state.unit,
         );
       },
@@ -113,30 +113,13 @@ class MainPageState extends State<MainPage>
             ),
           ),
           floatingActionButton: new FloatingActionButton(
-            onPressed: () =>
-                _openAddEntryDialog(viewModel.defaultWeight,
-                    viewModel.unit, context, viewModel.addEntryCallback),
+            onPressed: () => viewModel.addEntryFunction(),
             tooltip: 'Add new weight entry',
             child: new Icon(Icons.add),
           ),
         );
       },
     );
-  }
-
-  _openAddEntryDialog(double defaultWeight, String unit, BuildContext context,
-      Function(AddEntryAction) addEntryCallback) async {
-    var result = await Navigator.of(context).push(new MaterialPageRoute(
-        builder: (BuildContext context) {
-          return new WeightEntryDialog.add(
-            initialWeight: defaultWeight,
-            unit: unit,
-          );
-        },
-        fullscreenDialog: true));
-    if (result != null && result is AddEntryAction) {
-      addEntryCallback(result);
-    }
   }
 
   _scrollToTop() {
