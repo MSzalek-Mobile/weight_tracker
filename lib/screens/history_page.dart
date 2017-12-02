@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:meta/meta.dart';
 import 'package:weight_tracker/logic/actions.dart';
-import 'package:weight_tracker/logic/redux_core.dart';
+import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 import 'package:weight_tracker/widgets/weight_list_item.dart';

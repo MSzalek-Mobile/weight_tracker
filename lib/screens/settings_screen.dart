@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:meta/meta.dart';
 import 'package:weight_tracker/logic/actions.dart';
-import 'package:weight_tracker/logic/redux_core.dart';
+import 'package:weight_tracker/logic/redux_state.dart';
 
 @immutable
 class SettingsPageViewModel {

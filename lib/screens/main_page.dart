@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:weight_tracker/logic/actions.dart';
-import 'package:weight_tracker/logic/redux_core.dart';
+import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/history_page.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
