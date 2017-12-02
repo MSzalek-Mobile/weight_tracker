@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:weight_tracker/logic/constants.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart.dart';
@@ -25,7 +26,15 @@ class StatisticsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, _StatisticsPageViewModel>(
       converter: (store) {
-        List<WeightEntry> entries = new List.from(store.state.entries);
+        String unit = store.state.unit;
+        List<WeightEntry> entries = new List();
+        store.state.entries.forEach((entry) {
+          if (unit == "kg") {
+            entries.add(entry);
+          } else {
+            entries.add(entry.copyWith(weight: entry.weight * KG_LBS_RATIO));
+          }
+        });
         List<WeightEntry> last7daysEntries = entries
             .where((entry) =>
             entry.dateTime
@@ -48,8 +57,8 @@ class StatisticsPage extends StatelessWidget {
               ? 0.0
               : (last30daysEntries.first.weight -
               last30daysEntries.last.weight),
-          entries: store.state.entries,
-          unit: store.state.unit,
+          entries: entries,
+          unit: unit,
         );
       },
       builder: (context, viewModel) {

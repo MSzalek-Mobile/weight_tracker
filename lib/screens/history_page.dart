@@ -77,7 +77,8 @@ class HistoryPage extends StatelessWidget {
                   onTap: () =>
                       viewModel.openEditDialog(viewModel.entries[index]),
                   child:
-                  new WeightListItem(viewModel.entries[index], difference));
+                  new WeightListItem(
+                      viewModel.entries[index], difference, viewModel.unit));
             },
           );
         }

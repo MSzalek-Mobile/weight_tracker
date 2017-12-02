@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:weight_tracker/logic/actions.dart';
+import 'package:weight_tracker/logic/constants.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
@@ -13,6 +14,7 @@ class DialogViewModel {
   final WeightEntry weightEntry;
   final String unit;
   final bool isEditMode;
+  final double weightToDisplay;
   final Function(WeightEntry) onEntryChanged;
   final Function() onDeletePressed;
   final Function() onSavePressed;
@@ -21,6 +23,7 @@ class DialogViewModel {
     this.weightEntry,
     this.unit,
     this.isEditMode,
+    this.weightToDisplay,
     this.onEntryChanged,
     this.onDeletePressed,
     this.onSavePressed,
@@ -28,7 +31,6 @@ class DialogViewModel {
 }
 
 class WeightEntryDialog extends StatefulWidget {
-
   @override
   State<WeightEntryDialog> createState() {
     return new WeightEntryDialogState();
@@ -53,6 +55,9 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
             weightEntry: store.state.activeEntry,
             unit: store.state.unit,
             isEditMode: store.state.isEditMode,
+            weightToDisplay: store.state.unit == "kg"
+                ? store.state.activeEntry.weight
+                : store.state.activeEntry.weight * KG_LBS_RATIO,
             onEntryChanged: (entry) =>
                 store.dispatch(new UpdateActiveWeightEntry(entry)),
             onDeletePressed: () {
@@ -94,7 +99,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
                   width: 24.0,
                 ),
                 title: new Text(
-                  viewModel.weightEntry.weight.toString() +
+                  viewModel.weightToDisplay.toStringAsFixed(1) +
                       " " +
                       viewModel.unit,
                 ),
@@ -161,11 +166,14 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
       child: new NumberPickerDialog.decimal(
         minValue: 1,
         maxValue: 300,
-        initialDoubleValue: viewModel.weightEntry.weight,
+        initialDoubleValue: viewModel.weightToDisplay,
         title: new Text("Enter your weight"),
       ),
-    ).then((value) {
+    ).then((double value) {
       if (value != null) {
+        if (viewModel.unit == "lbs") {
+          value = value / KG_LBS_RATIO;
+        }
         viewModel.onEntryChanged(viewModel.weightEntry..weight = value);
       }
     });

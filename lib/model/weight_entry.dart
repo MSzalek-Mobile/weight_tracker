@@ -25,8 +25,8 @@ class WeightEntry {
 
   WeightEntry._internal(this.key, this.dateTime, this.weight, this.note);
 
-  WeightEntry copyWith(String key, DateTime dateTime, double weight,
-      String note) {
+  WeightEntry copyWith({String key, DateTime dateTime, double weight,
+    String note}) {
     return new WeightEntry._internal(
       key ?? this.key,
       dateTime ?? this.dateTime,
