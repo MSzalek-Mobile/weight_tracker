@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:weight_tracker/logic/redux_core.dart';
+import 'package:weight_tracker/logic/constants.dart';
+import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart.dart';
 
@@ -10,12 +11,14 @@ class _StatisticsPageViewModel {
   final double last7daysProgress;
   final double last30daysProgress;
   final List<WeightEntry> entries;
+  final String unit;
 
   _StatisticsPageViewModel({this.last7daysProgress,
     this.last30daysProgress,
     this.totalProgress,
     this.currentWeight,
-    this.entries});
+    this.entries,
+    this.unit});
 }
 
 class StatisticsPage extends StatelessWidget {
@@ -23,7 +26,15 @@ class StatisticsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, _StatisticsPageViewModel>(
       converter: (store) {
-        List<WeightEntry> entries = new List.from(store.state.entries);
+        String unit = store.state.unit;
+        List<WeightEntry> entries = new List();
+        store.state.entries.forEach((entry) {
+          if (unit == "kg") {
+            entries.add(entry);
+          } else {
+            entries.add(entry.copyWith(weight: entry.weight * KG_LBS_RATIO));
+          }
+        });
         List<WeightEntry> last7daysEntries = entries
             .where((entry) =>
             entry.dateTime
@@ -46,25 +57,29 @@ class StatisticsPage extends StatelessWidget {
               ? 0.0
               : (last30daysEntries.first.weight -
               last30daysEntries.last.weight),
-          entries: store.state.entries,
+          entries: entries,
+          unit: unit,
         );
       },
       builder: (context, viewModel) {
         return new ListView(
           children: <Widget>[
             new _StatisticCardWrapper(
-              child: new Padding(padding: new EdgeInsets.all(8.0),
+              child: new Padding(
+                  padding: new EdgeInsets.all(8.0),
                   child: new ProgressChart(viewModel.entries)),
               height: 200.0,
             ),
             new _StatisticCard(
               title: "Current weight",
               value: viewModel.currentWeight,
+              unit: viewModel.unit,
             ),
             new _StatisticCard(
               title: "Progress done",
               value: viewModel.totalProgress,
               processNumberSymbol: true,
+              unit: viewModel.unit,
             ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -75,6 +90,7 @@ class StatisticsPage extends StatelessWidget {
                     value: viewModel.last7daysProgress,
                     textSizeFactor: 0.8,
                     processNumberSymbol: true,
+                    unit: viewModel.unit,
                   ),
                 ),
                 new Expanded(
@@ -83,6 +99,7 @@ class StatisticsPage extends StatelessWidget {
                     value: viewModel.last30daysProgress,
                     textSizeFactor: 0.8,
                     processNumberSymbol: true,
+                    unit: viewModel.unit,
                   ),
                 ),
               ],
@@ -120,9 +137,11 @@ class _StatisticCard extends StatelessWidget {
   final num value;
   final bool processNumberSymbol;
   final double textSizeFactor;
+  final String unit;
 
   _StatisticCard({this.title,
     this.value,
+    this.unit,
     this.processNumberSymbol = false,
     this.textSizeFactor = 1.0});
 
@@ -148,7 +167,7 @@ class _StatisticCard extends StatelessWidget {
                 ),
                 new Padding(
                     padding: new EdgeInsets.only(left: 5.0),
-                    child: new Text("kg")),
+                    child: new Text(unit)),
               ],
               mainAxisAlignment: MainAxisAlignment.center,
             ),

@@ -107,9 +107,9 @@ class ChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    leftOffsetStart = size.width * 0.05;
+    leftOffsetStart = size.width * 0.07;
     topOffsetEnd = size.height * 0.9;
-    drawingWidth = size.width * 0.95;
+    drawingWidth = size.width * 0.93;
     drawingHeight = topOffsetEnd;
 
     if (entries.isEmpty) {

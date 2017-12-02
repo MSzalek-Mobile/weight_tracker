@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:weight_tracker/logic/constants.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 class WeightListItem extends StatelessWidget {
   final WeightEntry weightEntry;
   final double weightDifference;
+  final String unit;
 
-  WeightListItem(this.weightEntry, this.weightDifference);
+  WeightListItem(this.weightEntry, this.weightDifference, this.unit);
 
   @override
   Widget build(BuildContext context) {
+    double displayWeight =
+    unit == "kg" ? weightEntry.weight : weightEntry.weight * KG_LBS_RATIO;
+    double displayDifference =
+    unit == "kg" ? weightDifference : weightDifference * KG_LBS_RATIO;
     return new Padding(
       padding: new EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: new Row(
@@ -28,8 +34,8 @@ class WeightListItem extends StatelessWidget {
                       textAlign: TextAlign.left,
                     ),
                     new Text(
-                      new TimeOfDay.fromDateTime(weightEntry.dateTime).format(
-                          context),
+                      new TimeOfDay.fromDateTime(weightEntry.dateTime)
+                          .format(context),
                       textScaleFactor: 0.8,
                       textAlign: TextAlign.right,
                       style: new TextStyle(
@@ -42,21 +48,21 @@ class WeightListItem extends StatelessWidget {
                 ),
                 (weightEntry.note == null || weightEntry.note.isEmpty)
                     ? new Container(
-                        height: 0.0,
-                      )
+                  height: 0.0,
+                )
                     : new Padding(
-                        padding: new EdgeInsets.only(left: 4.0),
-                        child: new Icon(
-                          Icons.speaker_notes,
-                          color: Colors.grey[300],
-                          size: 16.0,
-                        ),
-                      ),
+                  padding: new EdgeInsets.only(left: 4.0),
+                  child: new Icon(
+                    Icons.speaker_notes,
+                    color: Colors.grey[300],
+                    size: 16.0,
+                  ),
+                ),
               ],
             ),
           ),
           new Text(
-            weightEntry.weight.toString(),
+            displayWeight.toStringAsFixed(1),
             textScaleFactor: 2.0,
             textAlign: TextAlign.center,
           ),
@@ -65,7 +71,7 @@ class WeightListItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 new Text(
-                  _differenceText(weightDifference),
+                  _differenceText(displayDifference),
                   textScaleFactor: 1.6,
                   textAlign: TextAlign.right,
                 ),
