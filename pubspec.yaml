@@ -12,7 +12,7 @@ dependencies:
   tuple: "^1.0.1"
   intl: 0.15.1
   shared_preferences: "^0.2.5"
-  mockito: "^2.2.1"
+  mockito: "^2.2.0"
 
 dev_dependencies:
   flutter_test:
