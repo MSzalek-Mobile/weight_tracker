@@ -10,8 +10,13 @@ dependencies:
   redux: ">=2.0.0 <3.0.0"
   flutter_redux: 0.3.2
   tuple: "^1.0.1"
-  intl: 0.15.2
+  intl: 0.15.1
   shared_preferences: "^0.2.5"
+  mockito: "^2.2.1"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
 
 
 flutter:
