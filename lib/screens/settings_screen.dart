@@ -36,6 +36,7 @@ class SettingsPage extends StatelessWidget {
                 style: Theme.of(context).textTheme.headline,
               )),
               new DropdownButton<String>(
+                key: const Key('UnitDropdown'),
                 value: viewModel.unit,
                 items: <String>["kg", "lbs"].map((String value) {
                   return new DropdownMenuItem<String>(
