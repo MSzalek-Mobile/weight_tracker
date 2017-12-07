@@ -86,10 +86,12 @@ class MainPageState extends State<MainPage>
                   bottom: new TabBar(
                     tabs: <Tab>[
                       new Tab(
+                        key: new Key('StatisticsTab'),
                         text: "STATISTICS",
                         icon: new Icon(Icons.show_chart),
                       ),
                       new Tab(
+                        key: new Key('HistoryTab'),
                         text: "HISTORY",
                         icon: new Icon(Icons.history),
                       ),
