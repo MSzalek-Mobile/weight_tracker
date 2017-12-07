@@ -13,7 +13,7 @@ before_script:
   - git clone https://github.com/flutter/flutter.git -b alpha --depth 1
   - ./flutter/bin/flutter doctor
 script:
-  - ./flutter/bin/flutter test test/unit_tests/* test/widget_tests/* --coverage
+  - ./flutter/bin/flutter test --coverage test/unit_tests/* test/widget_tests/*
 after_success:
   - coveralls-lcov coverage/lcov.info
 cache:
