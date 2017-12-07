@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:quiver/core.dart';
 
 class WeightEntry {
   String key;
@@ -25,8 +26,8 @@ class WeightEntry {
 
   WeightEntry._internal(this.key, this.dateTime, this.weight, this.note);
 
-  WeightEntry copyWith({String key, DateTime dateTime, double weight,
-    String note}) {
+  WeightEntry copyWith(
+      {String key, DateTime dateTime, double weight, String note}) {
     return new WeightEntry._internal(
       key ?? this.key,
       dateTime ?? this.dateTime,
@@ -42,4 +43,16 @@ class WeightEntry {
       "note": note
     };
   }
+
+  @override
+  int get hashCode => hash4(key, dateTime, weight, note);
+
+  @override
+  bool operator ==(other) =>
+      other is WeightEntry &&
+          key == other.key &&
+          dateTime.millisecondsSinceEpoch == other.dateTime
+              .millisecondsSinceEpoch &&
+          weight == other.weight &&
+          note == other.note;
 }
