@@ -3,6 +3,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:redux/redux.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/reducer.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
@@ -123,4 +124,58 @@ void main() {
         expect(find.text('70'), findsOneWidget);
         expect(find.text('0'), findsOneWidget);
       });
+
+  testWidgets('Clicking Save on edit invokes EditEntryAction with activeEntry',
+          (WidgetTester tester) async {
+        WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+        var reducer = (state, action) {
+          expect(action, new isInstanceOf<EditEntryAction>());
+          expect((action as EditEntryAction).weightEntry, entry);
+        };
+        await pumpSettingWidget(
+            new Store(reducer,
+                initialState: defaultState.copyWith(activeEntry: entry)),
+            tester);
+        await tester.tap(find.text('SAVE'));
+      });
+
+  testWidgets('Clicking Save on create invokes AddEntryAction with ActiveEntry',
+          (WidgetTester tester) async {
+        WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+        var reducer = (state, action) {
+          expect(action, new isInstanceOf<AddEntryAction>());
+          expect((action as AddEntryAction).weightEntry, entry);
+        };
+        await pumpSettingWidget(
+            new Store(reducer,
+                initialState:
+                defaultState.copyWith(activeEntry: entry, isEditMode: false)),
+            tester);
+        await tester.tap(find.text('SAVE'));
+      });
+
+  testWidgets('Clicking Delete invokes RemoveEntryAction with activeEntry',
+          (WidgetTester tester) async {
+        WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+        var reducer = (state, action) {
+          expect(action, new isInstanceOf<RemoveEntryAction>());
+          expect((action as RemoveEntryAction).weightEntry, entry);
+        };
+        await pumpSettingWidget(
+            new Store(reducer,
+                initialState: defaultState.copyWith(activeEntry: entry)),
+            tester);
+        await tester.tap(find.text('DELETE'));
+      });
+
+  testWidgets('Changing note updates activeEntry', (WidgetTester tester) async {
+    WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+    Store<ReduxState> store = new Store(reduce,
+        initialState: defaultState.copyWith(activeEntry: entry));
+    await pumpSettingWidget(store, tester);
+    await tester.enterText(find.byType(TextField), 'Lorem');
+    expect(store.state.activeEntry.note, 'Lorem');
+  });
+
+
 }
