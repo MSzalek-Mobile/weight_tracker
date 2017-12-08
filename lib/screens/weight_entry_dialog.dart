@@ -201,6 +201,7 @@ class DateTimeItem extends StatelessWidget {
       children: <Widget>[
         new Expanded(
           child: new InkWell(
+            key: new Key('CalendarItem'),
             onTap: (() => _showDatePicker(context)),
             child: new Padding(
                 padding: new EdgeInsets.symmetric(vertical: 8.0),
@@ -208,6 +209,7 @@ class DateTimeItem extends StatelessWidget {
           ),
         ),
         new InkWell(
+          key: new Key('TimeItem'),
           onTap: (() => _showTimePicker(context)),
           child: new Padding(
               padding: new EdgeInsets.symmetric(vertical: 8.0),

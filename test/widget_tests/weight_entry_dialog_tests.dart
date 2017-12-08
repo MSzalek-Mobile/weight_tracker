@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:redux/redux.dart';
 import 'package:weight_tracker/logic/reducer.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
@@ -91,4 +92,35 @@ void main() {
         new Store(reduce, initialState: defaultState), tester);
     expect(find.text('Optional note'), findsOneWidget);
   });
+
+  //DatePickerDialog is private
+  testWidgets('WeightEntryDialog opens MonthPicker on date click',
+          (WidgetTester tester) async {
+        await pumpSettingWidget(
+            new Store(reduce, initialState: defaultState), tester);
+        await tester.tap(find.byKey(new Key('CalendarItem')));
+        await tester.pump();
+        expect(find.byType(MonthPicker), findsOneWidget);
+      });
+
+  //TimePicker is private
+  testWidgets('WeightEntryDialog opens Dialog on time click',
+          (WidgetTester tester) async {
+        await pumpSettingWidget(
+            new Store(reduce, initialState: defaultState), tester);
+        await tester.tap(find.byKey(new Key('TimeItem')));
+        await tester.pump();
+        expect(find.byType(Dialog), findsOneWidget);
+      });
+
+  testWidgets('WeightEntryDialog opens NumberPickerDialog on weight click',
+          (WidgetTester tester) async {
+        await pumpSettingWidget(
+            new Store(reduce, initialState: defaultState), tester);
+        await tester.tap(find.text('70.0 kg'));
+        await tester.pump();
+        expect(find.byType(NumberPickerDialog), findsOneWidget);
+        expect(find.text('70'), findsOneWidget);
+        expect(find.text('0'), findsOneWidget);
+      });
 }
