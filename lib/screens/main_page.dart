@@ -5,6 +5,7 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/history_page.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
+import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 
 class MainPageViewModel {
   final double defaultWeight;
@@ -62,8 +63,15 @@ class MainPageState extends State<MainPage>
           hasEntryBeenAdded: store.state.hasEntryBeenAdded,
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
-          addEntryFunction: () =>
-              store.dispatch(new OpenAddEntryDialog(context)),
+          addEntryFunction: () {
+            store.dispatch(new OpenAddEntryDialog());
+            Navigator.of(context).push(new MaterialPageRoute(
+              builder: (BuildContext context) {
+                return new WeightEntryDialog();
+              },
+              fullscreenDialog: true,
+            ));
+          },
           unit: store.state.unit,
         );
       },

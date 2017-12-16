@@ -124,7 +124,7 @@ void main() {
     ReduxState initialState = new ReduxState(activeEntry: null);
     WeightEntry updatedEntry =
     new WeightEntry(new DateTime.now(), 60.0, "text");
-    OpenEditEntryDialog action = new OpenEditEntryDialog(null, updatedEntry);
+    OpenEditEntryDialog action = new OpenEditEntryDialog(updatedEntry);
     //when
     ReduxState newState = reduce(initialState, action);
     //then
@@ -136,7 +136,7 @@ void main() {
     ReduxState initialState = new ReduxState(isEditMode: false);
     WeightEntry updatedEntry =
     new WeightEntry(new DateTime.now(), 60.0, "text");
-    OpenEditEntryDialog action = new OpenEditEntryDialog(null, updatedEntry);
+    OpenEditEntryDialog action = new OpenEditEntryDialog(updatedEntry);
     //when
     ReduxState newState = reduce(initialState, action);
     //then
@@ -146,7 +146,7 @@ void main() {
   test('reducer OpenAddEntryDialog sets EditMode to false', () {
     //given
     ReduxState initialState = new ReduxState(isEditMode: true, entries: []);
-    OpenAddEntryDialog action = new OpenAddEntryDialog(null);
+    OpenAddEntryDialog action = new OpenAddEntryDialog();
     //when
     ReduxState newState = reduce(initialState, action);
     //then
@@ -156,7 +156,7 @@ void main() {
   test('reducer OpenAddEntryDialog creates new entry with weight 70', () {
     //given
     ReduxState initialState = new ReduxState(activeEntry: null, entries: []);
-    OpenAddEntryDialog action = new OpenAddEntryDialog(null);
+    OpenAddEntryDialog action = new OpenAddEntryDialog();
     //when
     ReduxState newState = reduce(initialState, action);
     //then
@@ -170,7 +170,7 @@ void main() {
         ReduxState initialState = new ReduxState(
             activeEntry: null,
             entries: [new WeightEntry(new DateTime.now(), 60.0, "Text")]);
-        OpenAddEntryDialog action = new OpenAddEntryDialog(null);
+        OpenAddEntryDialog action = new OpenAddEntryDialog();
         //when
         ReduxState newState = reduce(initialState, action);
         //then

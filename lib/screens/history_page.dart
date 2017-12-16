@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
+import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 import 'package:weight_tracker/widgets/weight_list_item.dart';
 
 @immutable
@@ -37,8 +38,15 @@ class HistoryPage extends StatelessWidget {
       converter: (store) {
         return new HistoryPageViewModel(
           entries: store.state.entries,
-          openEditDialog: (entry) =>
-              store.dispatch(new OpenEditEntryDialog(context, entry)),
+          openEditDialog: (entry) {
+            store.dispatch(new OpenEditEntryDialog(entry));
+            Navigator.of(context).push(new MaterialPageRoute(
+              builder: (BuildContext context) {
+                return new WeightEntryDialog();
+              },
+              fullscreenDialog: true,
+            ));
+          },
           hasEntryBeenRemoved: store.state.hasEntryBeenRemoved,
           acceptEntryRemoved: () =>
               store.dispatch(new AcceptEntryRemovalAction()),
@@ -76,8 +84,7 @@ class HistoryPage extends StatelessWidget {
               return new InkWell(
                   onTap: () =>
                       viewModel.openEditDialog(viewModel.entries[index]),
-                  child:
-                  new WeightListItem(
+                  child: new WeightListItem(
                       viewModel.entries[index], difference, viewModel.unit));
             },
           );

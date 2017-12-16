@@ -4,6 +4,7 @@ import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/constants.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
+import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 import 'package:weight_tracker/widgets/progress_chart.dart';
 
 class _StatisticsPageViewModel {
@@ -15,7 +16,8 @@ class _StatisticsPageViewModel {
   final String unit;
   final Function() openAddEntryDialog;
 
-  _StatisticsPageViewModel({this.last7daysProgress,
+  _StatisticsPageViewModel({
+    this.last7daysProgress,
     this.last30daysProgress,
     this.totalProgress,
     this.currentWeight,
@@ -65,7 +67,13 @@ class StatisticsPage extends StatelessWidget {
           unit: unit,
           openAddEntryDialog: () {
             if (last30daysEntries.isEmpty) {
-              store.dispatch(new OpenAddEntryDialog(context));
+              store.dispatch(new OpenAddEntryDialog());
+              Navigator.of(context).push(new MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return new WeightEntryDialog();
+                },
+                fullscreenDialog: true,
+              ));
             }
           },
         );
