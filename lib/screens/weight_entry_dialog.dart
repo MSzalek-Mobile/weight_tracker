@@ -51,24 +51,26 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, DialogViewModel>(
       converter: (store) {
+        WeightEntry activeEntry = store.state.weightEntryDialogState
+            .activeEntry;
         return new DialogViewModel(
-            weightEntry: store.state.activeEntry,
+            weightEntry: activeEntry,
             unit: store.state.unit,
-            isEditMode: store.state.isEditMode,
+            isEditMode: store.state.weightEntryDialogState.isEditMode,
             weightToDisplay: store.state.unit == "kg"
-                ? store.state.activeEntry.weight
-                : store.state.activeEntry.weight * KG_LBS_RATIO,
+                ? activeEntry.weight
+                : activeEntry.weight * KG_LBS_RATIO,
             onEntryChanged: (entry) =>
                 store.dispatch(new UpdateActiveWeightEntry(entry)),
             onDeletePressed: () {
-              store.dispatch(new RemoveEntryAction(store.state.activeEntry));
+              store.dispatch(new RemoveEntryAction(activeEntry));
               Navigator.of(context).pop();
             },
             onSavePressed: () {
-              if (store.state.isEditMode) {
-                store.dispatch(new EditEntryAction(store.state.activeEntry));
+              if (store.state.weightEntryDialogState.isEditMode) {
+                store.dispatch(new EditEntryAction(activeEntry));
               } else {
-                store.dispatch(new AddEntryAction(store.state.activeEntry));
+                store.dispatch(new AddEntryAction(activeEntry));
               }
               Navigator.of(context).pop();
             });

@@ -11,8 +11,11 @@ import 'package:weight_tracker/screens/weight_entry_dialog.dart';
 
 void main() {
   WeightEntry activeEntry = new WeightEntry(new DateTime.now(), 70.0, null);
-  ReduxState defaultState = new ReduxState(
-      unit: 'kg', entries: [], isEditMode: true, activeEntry: activeEntry);
+  WeightEntryDialogReduxState dialogState = new WeightEntryDialogReduxState(
+      isEditMode: true, activeEntry: activeEntry);
+  WeightEntryDialogReduxState dialogAddState =
+  dialogState.copyWith(isEditMode: false);
+  ReduxState defaultState = new ReduxState(weightEntryDialogState: dialogState);
 
   pumpSettingWidget(Store store, WidgetTester tester) async {
     await tester.pumpWidget(new StatefulBuilder(
@@ -35,7 +38,8 @@ void main() {
       (WidgetTester tester) async {
     await pumpSettingWidget(
         new Store(reduce,
-            initialState: defaultState.copyWith(isEditMode: false)),
+            initialState:
+            defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
     expect(find.widgetWithText(AppBar, 'New entry'), findsOneWidget);
   });
@@ -51,7 +55,8 @@ void main() {
       (WidgetTester tester) async {
     await pumpSettingWidget(
         new Store(reduce,
-            initialState: defaultState.copyWith(isEditMode: false)),
+            initialState:
+            defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
     expect(find.widgetWithText(FlatButton, 'SAVE'), findsOneWidget);
   });
@@ -67,7 +72,8 @@ void main() {
       (WidgetTester tester) async {
     await pumpSettingWidget(
         new Store(reduce,
-            initialState: defaultState.copyWith(isEditMode: false)),
+            initialState:
+            defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
     expect(find.widgetWithText(FlatButton, 'DELETE'), findsNothing);
   });
@@ -133,8 +139,13 @@ void main() {
           expect((action as EditEntryAction).weightEntry, entry);
         };
         await pumpSettingWidget(
-            new Store(reducer,
-                initialState: defaultState.copyWith(activeEntry: entry)),
+            new Store(
+              reducer,
+              initialState: defaultState.copyWith(
+                weightEntryDialogState: dialogState.copyWith(
+                    activeEntry: entry),
+              ),
+            ),
             tester);
         await tester.tap(find.text('SAVE'));
       });
@@ -147,9 +158,13 @@ void main() {
           expect((action as AddEntryAction).weightEntry, entry);
         };
         await pumpSettingWidget(
-            new Store(reducer,
-                initialState:
-                defaultState.copyWith(activeEntry: entry, isEditMode: false)),
+            new Store(
+              reducer,
+              initialState: defaultState.copyWith(
+                weightEntryDialogState: dialogAddState.copyWith(
+                    activeEntry: entry),
+              ),
+            ),
             tester);
         await tester.tap(find.text('SAVE'));
       });
@@ -162,8 +177,13 @@ void main() {
           expect((action as RemoveEntryAction).weightEntry, entry);
         };
         await pumpSettingWidget(
-            new Store(reducer,
-                initialState: defaultState.copyWith(activeEntry: entry)),
+            new Store(
+              reducer,
+              initialState: defaultState.copyWith(
+                weightEntryDialogState: dialogState.copyWith(
+                    activeEntry: entry),
+              ),
+            ),
             tester);
         await tester.tap(find.text('DELETE'));
       });
@@ -171,11 +191,11 @@ void main() {
   testWidgets('Changing note updates activeEntry', (WidgetTester tester) async {
     WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
     Store<ReduxState> store = new Store(reduce,
-        initialState: defaultState.copyWith(activeEntry: entry));
+        initialState: defaultState.copyWith(
+          weightEntryDialogState: dialogState.copyWith(activeEntry: entry),
+        ));
     await pumpSettingWidget(store, tester);
     await tester.enterText(find.byType(TextField), 'Lorem');
-    expect(store.state.activeEntry.note, 'Lorem');
+    expect(store.state.weightEntryDialogState.activeEntry.note, 'Lorem');
   });
-
-
 }

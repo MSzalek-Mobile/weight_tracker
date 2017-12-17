@@ -9,14 +9,7 @@ import 'package:weight_tracker/screens/settings_screen.dart';
 
 void main() {
   final Store store = new Store(reduce,
-      initialState: new ReduxState(
-          firebaseUser: null,
-          mainReference: null,
-          entries: new List(),
-          hasEntryBeenAdded: false,
-          lastRemovedEntry: null,
-          hasEntryBeenRemoved: false,
-          unit: 'kg'),
+      initialState: new ReduxState(),
       middleware: [middleware].toList());
 
   pumpSettingWidget(WidgetTester tester) async {

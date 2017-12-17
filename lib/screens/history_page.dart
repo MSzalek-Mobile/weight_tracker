@@ -47,7 +47,8 @@ class HistoryPage extends StatelessWidget {
               fullscreenDialog: true,
             ));
           },
-          hasEntryBeenRemoved: store.state.hasEntryBeenRemoved,
+          hasEntryBeenRemoved: store.state.removedEntryState
+              .hasEntryBeenRemoved,
           acceptEntryRemoved: () =>
               store.dispatch(new AcceptEntryRemovalAction()),
           undoEntryRemoval: () => store.dispatch(new UndoRemovalAction()),

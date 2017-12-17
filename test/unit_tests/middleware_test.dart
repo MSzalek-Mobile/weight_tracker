@@ -20,7 +20,8 @@ void main() {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
     when(firebaseMock.push()).thenReturn(firebaseMock);
-    ReduxState state = new ReduxState(mainReference: firebaseMock);
+    ReduxState state = new ReduxState(
+        firebaseState: new FirebaseState(mainReference: firebaseMock));
 
     Store store = new Store(reducerMock,
         initialState: state, middleware: [middleware].toList());
@@ -38,7 +39,8 @@ void main() {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
     when(firebaseMock.child(any)).thenReturn(firebaseMock);
-    ReduxState state = new ReduxState(mainReference: firebaseMock);
+    ReduxState state = new ReduxState(
+        firebaseState: new FirebaseState(mainReference: firebaseMock));
 
     Store store = new Store(reducerMock,
         initialState: state, middleware: [middleware].toList());
@@ -57,7 +59,8 @@ void main() {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
     when(firebaseMock.child(any)).thenReturn(firebaseMock);
-    ReduxState state = new ReduxState(mainReference: firebaseMock);
+    ReduxState state = new ReduxState(
+        firebaseState: new FirebaseState(mainReference: firebaseMock));
 
     Store store = new Store(reducerMock,
         initialState: state, middleware: [middleware].toList());
@@ -79,7 +82,9 @@ void main() {
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
     when(firebaseMock.child(weightEntry.key)).thenReturn(firebaseMock);
     ReduxState state = new ReduxState(
-        mainReference: firebaseMock, lastRemovedEntry: weightEntry);
+      firebaseState: new FirebaseState(mainReference: firebaseMock),
+      removedEntryState: new RemovedEntryState(lastRemovedEntry: weightEntry),
+    );
 
     Store store = new Store(reducerMock,
         initialState: state, middleware: [middleware].toList());

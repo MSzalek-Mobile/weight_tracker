@@ -31,7 +31,7 @@ middleware(Store<ReduxState> store, action, NextDispatcher next) {
 _handleUserLoadedAction(Store<ReduxState> store) {
   store.dispatch(new AddDatabaseReferenceAction(FirebaseDatabase.instance
       .reference()
-      .child(store.state.firebaseUser.uid)
+      .child(store.state.firebaseState.firebaseUser.uid)
       .child("entries")
         ..onChildAdded
             .listen((event) => store.dispatch(new OnAddedAction(event)))
@@ -47,29 +47,31 @@ _handleSetUnitAction(SetUnitAction action, Store<ReduxState> store) {
 }
 
 _handleUndoRemovalAction(Store<ReduxState> store) {
-  WeightEntry lastRemovedEntry = store.state.lastRemovedEntry;
-  store.state.mainReference
+  WeightEntry lastRemovedEntry = store.state.removedEntryState.lastRemovedEntry;
+  store.state.firebaseState.mainReference
       .child(lastRemovedEntry.key)
       .set(lastRemovedEntry.toJson());
 }
 
 _handleRemoveEntryAction(Store<ReduxState> store, RemoveEntryAction action) {
-  store.state.mainReference.child(action.weightEntry.key).remove();
+  store.state.firebaseState.mainReference.child(action.weightEntry.key)
+      .remove();
 }
 
 _handleEditEntryAction(Store<ReduxState> store, EditEntryAction action) {
-  store.state.mainReference
+  store.state.firebaseState.mainReference
       .child(action.weightEntry.key)
       .set(action.weightEntry.toJson());
 }
 
 _handleAddEntryAction(Store<ReduxState> store, AddEntryAction action) {
-  store.state.mainReference.push().set(action.weightEntry.toJson());
+  store.state.firebaseState.mainReference.push().set(
+      action.weightEntry.toJson());
 }
 
 _handleInitAction(Store<ReduxState> store) {
   _loadUnit().then((unit) => store.dispatch(new OnUnitChangedAction(unit)));
-  if (store.state.firebaseUser == null) {
+  if (store.state.firebaseState.firebaseUser == null) {
     FirebaseAuth.instance.currentUser().then((user) {
       if (user != null) {
         store.dispatch(new UserLoadedAction(user));

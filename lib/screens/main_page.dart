@@ -60,7 +60,7 @@ class MainPageState extends State<MainPage>
           defaultWeight: store.state.entries.isEmpty
               ? 60.0
               : store.state.entries.first.weight,
-          hasEntryBeenAdded: store.state.hasEntryBeenAdded,
+          hasEntryBeenAdded: store.state.mainPageState.hasEntryBeenAdded,
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
           addEntryFunction: () {

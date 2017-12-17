@@ -14,13 +14,12 @@ void main() {
 class MyApp extends StatelessWidget {
   final Store store = new Store(reduce,
       initialState: new ReduxState(
-          firebaseUser: null,
-          mainReference: null,
-          entries: new List(),
-          hasEntryBeenAdded: false,
-          lastRemovedEntry: null,
-          hasEntryBeenRemoved: false,
-          unit: 'kg'),
+          entries: [],
+          unit: 'kg',
+          removedEntryState: new RemovedEntryState(hasEntryBeenRemoved: false),
+          firebaseState: new FirebaseState(),
+          mainPageState: new MainPageReduxState(hasEntryBeenAdded: false),
+          weightEntryDialogState: new WeightEntryDialogReduxState()),
       middleware: [middleware].toList());
 
   @override

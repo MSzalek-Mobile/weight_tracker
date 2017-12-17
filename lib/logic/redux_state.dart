@@ -5,46 +5,99 @@ import 'package:weight_tracker/model/weight_entry.dart';
 
 @immutable
 class ReduxState {
-  final FirebaseUser firebaseUser;
-  final DatabaseReference mainReference;
   final List<WeightEntry> entries;
-  final bool hasEntryBeenAdded; //in other words: should scroll to top?
+  final String unit;
+  final RemovedEntryState removedEntryState;
+  final WeightEntryDialogReduxState weightEntryDialogState;
+  final FirebaseState firebaseState;
+  final MainPageReduxState mainPageState;
+
+  const ReduxState({
+    this.firebaseState = const FirebaseState(),
+    this.entries = const [],
+    this.mainPageState = const MainPageReduxState(),
+    this.unit = 'kg',
+    this.removedEntryState = const RemovedEntryState(),
+    this.weightEntryDialogState = const WeightEntryDialogReduxState(),
+  });
+
+  ReduxState copyWith({FirebaseState firebaseState,
+      List<WeightEntry> entries,
+      bool hasEntryBeenAdded,
+      String unit,
+    RemovedEntryState removedEntryState,
+    WeightEntryDialogReduxState weightEntryDialogState}) {
+    return new ReduxState(
+        firebaseState: firebaseState ?? this.firebaseState,
+        entries: entries ?? this.entries,
+        mainPageState: mainPageState ?? this.mainPageState,
+        unit: unit ?? this.unit,
+        weightEntryDialogState:
+        weightEntryDialogState ?? this.weightEntryDialogState,
+        removedEntryState: removedEntryState ?? this.removedEntryState);
+  }
+}
+
+@immutable
+class RemovedEntryState {
   final WeightEntry lastRemovedEntry;
   final bool hasEntryBeenRemoved; //in other words: should show snackbar?
-  final String unit;
+
+  const RemovedEntryState(
+      {this.lastRemovedEntry, this.hasEntryBeenRemoved = false});
+
+  RemovedEntryState copyWith({
+    WeightEntry lastRemovedEntry,
+    bool hasEntryBeenRemoved,
+  }) {
+    return new RemovedEntryState(
+        lastRemovedEntry: lastRemovedEntry ?? this.lastRemovedEntry,
+        hasEntryBeenRemoved: hasEntryBeenRemoved ?? this.hasEntryBeenRemoved);
+  }
+}
+
+@immutable
+class WeightEntryDialogReduxState {
   final bool isEditMode;
   final WeightEntry activeEntry; //entry to show in detail dialog
 
-  ReduxState(
-      {this.firebaseUser,
-      this.mainReference,
-      this.entries,
-      this.hasEntryBeenAdded,
-      this.lastRemovedEntry,
-      this.hasEntryBeenRemoved,
-      this.unit,
-        this.activeEntry,
-        this.isEditMode});
+  const WeightEntryDialogReduxState({this.isEditMode, this.activeEntry});
 
-  ReduxState copyWith(
-      {FirebaseUser firebaseUser,
-      DatabaseReference mainReference,
-      List<WeightEntry> entries,
-      bool hasEntryBeenAdded,
-      WeightEntry lastRemovedEntry,
-      bool hasEntryBeenRemoved,
-      String unit,
-        WeightEntry activeEntry,
-        bool isEditMode}) {
-    return new ReduxState(
+  WeightEntryDialogReduxState copyWith({
+    bool isEditMode,
+    WeightEntry activeEntry,
+  }) {
+    return new WeightEntryDialogReduxState(
+        isEditMode: isEditMode ?? this.isEditMode,
+        activeEntry: activeEntry ?? this.activeEntry);
+  }
+}
+
+@immutable
+class FirebaseState {
+  final FirebaseUser firebaseUser;
+  final DatabaseReference mainReference;
+
+  const FirebaseState({this.firebaseUser, this.mainReference});
+
+  FirebaseState copyWith({
+    FirebaseUser firebaseUser,
+    DatabaseReference mainReference,
+  }) {
+    return new FirebaseState(
         firebaseUser: firebaseUser ?? this.firebaseUser,
-        mainReference: mainReference ?? this.mainReference,
-        entries: entries ?? this.entries,
-        hasEntryBeenAdded: hasEntryBeenAdded ?? this.hasEntryBeenAdded,
-        lastRemovedEntry: lastRemovedEntry ?? this.lastRemovedEntry,
-        hasEntryBeenRemoved: hasEntryBeenRemoved ?? this.hasEntryBeenRemoved,
-        unit: unit ?? this.unit,
-        activeEntry: activeEntry ?? this.activeEntry,
-        isEditMode: isEditMode ?? this.isEditMode);
+        mainReference: mainReference ?? this.mainReference);
+  }
+}
+
+@immutable
+class MainPageReduxState {
+  final bool hasEntryBeenAdded; //in other words: should scroll to top?
+
+  const MainPageReduxState({this.hasEntryBeenAdded = false});
+
+  MainPageReduxState copyWith({bool hasEntryBeenAdded}) {
+    return new MainPageReduxState(
+        hasEntryBeenAdded: hasEntryBeenAdded ?? this.hasEntryBeenAdded);
   }
 }

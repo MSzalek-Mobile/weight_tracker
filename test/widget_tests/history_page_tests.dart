@@ -10,8 +10,7 @@ import 'package:weight_tracker/widgets/weight_list_item.dart';
 
 void main() {
   WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
-  ReduxState defaultState = new ReduxState(
-      unit: 'kg', entries: [entry, entry], hasEntryBeenRemoved: false);
+  ReduxState defaultState = new ReduxState(unit: 'kg', entries: [entry, entry]);
 
   pumpSettingWidget(Store store, WidgetTester tester) async {
     await tester.pumpWidget(new StatefulBuilder(
@@ -47,8 +46,13 @@ void main() {
   testWidgets('HistoryPage shows snackbar if entry was removed',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce,
-            initialState: defaultState.copyWith(hasEntryBeenRemoved: true)),
+        new Store(
+          reduce,
+          initialState: defaultState.copyWith(
+            removedEntryState: defaultState.removedEntryState
+                .copyWith(hasEntryBeenRemoved: true),
+          ),
+        ),
         tester);
     await tester.pump(new Duration(milliseconds: 100));
     expect(find.byType(SnackBar), findsOneWidget);
@@ -57,8 +61,13 @@ void main() {
   testWidgets('HistoryPage shows snackbar with proper text',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce,
-            initialState: defaultState.copyWith(hasEntryBeenRemoved: true)),
+        new Store(
+          reduce,
+          initialState: defaultState.copyWith(
+            removedEntryState: defaultState.removedEntryState
+                .copyWith(hasEntryBeenRemoved: true),
+          ),
+        ),
         tester);
     await tester.pump(new Duration(milliseconds: 100));
     expect(find.text('Entry deleted.'), findsOneWidget);
@@ -67,8 +76,13 @@ void main() {
   testWidgets('HistoryPage shows snackbar with proper action',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce,
-            initialState: defaultState.copyWith(hasEntryBeenRemoved: true)),
+        new Store(
+          reduce,
+          initialState: defaultState.copyWith(
+            removedEntryState: defaultState.removedEntryState
+                .copyWith(hasEntryBeenRemoved: true),
+          ),
+        ),
         tester);
     await tester.pump(new Duration(milliseconds: 100));
     expect(find.widgetWithText(SnackBarAction, 'UNDO'), findsOneWidget);
