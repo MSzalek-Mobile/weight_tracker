@@ -6,26 +6,49 @@ import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
-class ProgressChart extends StatelessWidget {
-  static const int NUMBER_OF_DAYS = 31;
+class ProgressChart extends StatefulWidget {
   final List<WeightEntry> entries;
 
   ProgressChart(this.entries);
 
   @override
+  State<StatefulWidget> createState() {
+    return new ProgressChartState();
+  }
+}
+
+class ProgressChartState extends State<ProgressChart> {
+  int numberOfDays = 30;
+  int previousNumOfDays;
+
+  @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
-      painter: new ChartPainter(_prepareEntryList(entries)),
+    return new GestureDetector(
+      onScaleStart: (scaleDetails) =>
+          setState(() => previousNumOfDays = numberOfDays),
+      onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
+        setState(() {
+          int newNumberOfDays =
+          (previousNumOfDays / scaleDetails.scale).round();
+          if (newNumberOfDays >= 7) {
+            numberOfDays = newNumberOfDays;
+          }
+        });
+      },
+      child: new CustomPaint(
+        painter:
+        new ChartPainter(_prepareEntryList(widget.entries), numberOfDays),
+      ),
     );
   }
 
   List<WeightEntry> _prepareEntryList(List<WeightEntry> initialEntries) {
-    DateTime beginningDate = _getStartDateOfChart();
+    DateTime beginningDate = _getStartDateOfChart(numberOfDays);
     List<WeightEntry> entries = initialEntries
         .where((entry) => entry.dateTime.isAfter(beginningDate))
         .toList();
-    if (entries.isNotEmpty && _isMissingEntryFromBeginningDate(
-        beginningDate, entries) &&
+    if (entries.isNotEmpty &&
+        _isMissingEntryFromBeginningDate(beginningDate, entries) &&
         _isAnyEntryBeforeBeginningDate(beginningDate, initialEntries)) {
       _addFakeEntryOnTheChartBeginning(initialEntries, entries, beginningDate);
     }
@@ -95,8 +118,9 @@ class ProgressChart extends StatelessWidget {
 
 class ChartPainter extends CustomPainter {
   final List<WeightEntry> entries;
+  final int numberOfDays;
 
-  ChartPainter(this.entries);
+  ChartPainter(this.entries, this.numberOfDays);
 
   double leftOffsetStart;
   double topOffsetEnd;
@@ -133,7 +157,7 @@ class ChartPainter extends CustomPainter {
     final paint = new Paint()
       ..color = Colors.blue[400]
       ..strokeWidth = 3.0;
-    DateTime beginningOfChart = _getStartDateOfChart();
+    DateTime beginningOfChart = _getStartDateOfChart(numberOfDays);
     for (int i = 0; i < entries.length - 1; i++) {
       Offset startEntryOffset = _getEntryOffset(
           entries[i], beginningOfChart, minLineValue, maxLineValue);
@@ -197,10 +221,10 @@ class ChartPainter extends CustomPainter {
   }
 
   void _drawBottomLabels(Canvas canvas, Size size) {
-    for (int daysFromStart = ProgressChart.NUMBER_OF_DAYS;
-    daysFromStart >= 0;
-    daysFromStart -= 7) {
-      double offsetXbyDay = drawingWidth / (ProgressChart.NUMBER_OF_DAYS);
+    for (int daysFromStart = numberOfDays;
+    daysFromStart > 0;
+    daysFromStart = (daysFromStart - (numberOfDays / 4)).round()) {
+      double offsetXbyDay = drawingWidth / numberOfDays;
       double offsetX = leftOffsetStart + offsetXbyDay * daysFromStart;
       ui.Paragraph paragraph = _buildParagraphForBottomLabel(daysFromStart);
       canvas.drawParagraph(
@@ -215,8 +239,8 @@ class ChartPainter extends CustomPainter {
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
         new ui.ParagraphStyle(fontSize: 10.0, textAlign: TextAlign.right))
       ..pushStyle(new ui.TextStyle(color: Colors.black))
-      ..addText(new DateFormat('d MMM').format(new DateTime.now().subtract(
-          new Duration(days: ProgressChart.NUMBER_OF_DAYS - daysFromStart))));
+      ..addText(new DateFormat('d MMM').format(new DateTime.now()
+          .subtract(new Duration(days: numberOfDays - daysFromStart))));
     final ui.Paragraph paragraph = builder.build()
       ..layout(new ui.ParagraphConstraints(width: 50.0));
     return paragraph;
@@ -268,7 +292,7 @@ class ChartPainter extends CustomPainter {
     int daysFromBeginning = entry.dateTime
         .difference(beginningOfChart)
         .inDays;
-    double relativeXposition = daysFromBeginning / ProgressChart.NUMBER_OF_DAYS;
+    double relativeXposition = daysFromBeginning / numberOfDays;
     double xOffset = leftOffsetStart + relativeXposition * drawingWidth;
     double relativeYposition =
         (entry.weight - minLineValue) / (maxLineValue - minLineValue);
@@ -294,11 +318,9 @@ class ChartPainter extends CustomPainter {
   }
 }
 
-DateTime _getStartDateOfChart() {
+DateTime _getStartDateOfChart(int daysToSubtract) {
   DateTime now = new DateTime.now();
-  DateTime beginningOfChart = now.subtract(new Duration(
-      days: ProgressChart.NUMBER_OF_DAYS,
-      hours: now.hour,
-      minutes: now.minute));
+  DateTime beginningOfChart = now.subtract(
+      new Duration(days: daysToSubtract, hours: now.hour, minutes: now.minute));
   return beginningOfChart;
 }
