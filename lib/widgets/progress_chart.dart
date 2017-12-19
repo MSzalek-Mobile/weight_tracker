@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
+import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 
 class ProgressChart extends StatefulWidget {
   final List<WeightEntry> entries;
@@ -18,7 +19,7 @@ class ProgressChart extends StatefulWidget {
 }
 
 class ProgressChartState extends State<ProgressChart> {
-  int numberOfDays = 30;
+  int numberOfDays = 31;
   int previousNumOfDays;
 
   @override
@@ -30,89 +31,18 @@ class ProgressChartState extends State<ProgressChart> {
         setState(() {
           int newNumberOfDays =
           (previousNumOfDays / scaleDetails.scale).round();
-          if (newNumberOfDays >= 7) {
+          if (newNumberOfDays >= 8) {
             numberOfDays = newNumberOfDays;
           }
         });
       },
       child: new CustomPaint(
-        painter:
-        new ChartPainter(_prepareEntryList(widget.entries), numberOfDays),
+        painter: new ChartPainter(
+            utils.prepareEntryList(
+                widget.entries, new DateTime.now(), numberOfDays),
+            numberOfDays),
       ),
     );
-  }
-
-  List<WeightEntry> _prepareEntryList(List<WeightEntry> initialEntries) {
-    DateTime beginningDate = _getStartDateOfChart(numberOfDays);
-    List<WeightEntry> entries = initialEntries
-        .where((entry) => entry.dateTime.isAfter(beginningDate))
-        .toList();
-    if (entries.isNotEmpty &&
-        _isMissingEntryFromBeginningDate(beginningDate, entries) &&
-        _isAnyEntryBeforeBeginningDate(beginningDate, initialEntries)) {
-      _addFakeEntryOnTheChartBeginning(initialEntries, entries, beginningDate);
-    }
-    return entries;
-  }
-
-  /// Adds missing entry at the start of a chart.
-  ///
-  /// If user has not put entry on the date which is first date of a chart,
-  /// it takes last known weight before that date and estimates linearly weight on the beginning date.
-  /// Then it creates and adds fake [WeightEntry] with that weight and date.
-  void _addFakeEntryOnTheChartBeginning(List<WeightEntry> initialEntries,
-      List<WeightEntry> entries, DateTime beginningDate) {
-    List<WeightEntry> entriesNotInChart =
-    initialEntries.where((entry) => !entries.contains(entry)).toList();
-    WeightEntry firstEntryAfterBeginning = entries.last;
-    WeightEntry lastEntryBeforeBeginning = entriesNotInChart.first;
-    WeightEntry fakeEntry = new WeightEntry(
-        beginningDate,
-        _calculateWeightOnBeginningDate(
-            lastEntryBeforeBeginning, firstEntryAfterBeginning, beginningDate),
-        null);
-    entries.add(fakeEntry);
-  }
-
-  bool _isMissingEntryFromBeginningDate(DateTime beginningDate,
-      List<WeightEntry> entries) {
-    return !entries.any((entry) =>
-    entry.dateTime.day == beginningDate.day &&
-        entry.dateTime.month == beginningDate.month &&
-        entry.dateTime.year == beginningDate.year);
-  }
-
-  bool _isAnyEntryBeforeBeginningDate(DateTime beginningDate,
-      List<WeightEntry> entries) {
-    return entries.any((entry) => entry.dateTime.isBefore(beginningDate));
-  }
-
-  double _calculateWeightOnBeginningDate(WeightEntry lastEntryBeforeBeginning,
-      WeightEntry firstEntryAfterBeginning, DateTime beginningDate) {
-    DateTime firstEntryDateTime =
-    _copyDateWithoutTime(firstEntryAfterBeginning.dateTime);
-    DateTime lastEntryDateTime =
-    _copyDateWithoutTime(lastEntryBeforeBeginning.dateTime);
-
-    int differenceInDays =
-        firstEntryDateTime
-            .difference(lastEntryDateTime)
-            .inDays;
-    double differenceInWeight =
-        firstEntryAfterBeginning.weight - lastEntryBeforeBeginning.weight;
-    int differenceInDaysFromBeginning =
-        beginningDate
-            .difference(lastEntryDateTime)
-            .inDays;
-    double weightChangeFromLastEntry =
-        (differenceInWeight * differenceInDaysFromBeginning) / differenceInDays;
-    double estimatedWeight =
-        lastEntryBeforeBeginning.weight + weightChangeFromLastEntry;
-    return estimatedWeight;
-  }
-
-  DateTime _copyDateWithoutTime(DateTime dateTime) {
-    return new DateTime.utc(dateTime.year, dateTime.month, dateTime.day);
   }
 }
 
@@ -157,7 +87,8 @@ class ChartPainter extends CustomPainter {
     final paint = new Paint()
       ..color = Colors.blue[400]
       ..strokeWidth = 3.0;
-    DateTime beginningOfChart = _getStartDateOfChart(numberOfDays);
+    DateTime beginningOfChart = utils.getStartDateOfChart(
+        new DateTime.now(), numberOfDays);
     for (int i = 0; i < entries.length - 1; i++) {
       Offset startEntryOffset = _getEntryOffset(
           entries[i], beginningOfChart, minLineValue, maxLineValue);
@@ -316,11 +247,4 @@ class ChartPainter extends CustomPainter {
     canvas.drawParagraph(
         paragraph, new Offset(0.0, size.height / 2 - fontSize));
   }
-}
-
-DateTime _getStartDateOfChart(int daysToSubtract) {
-  DateTime now = new DateTime.now();
-  DateTime beginningOfChart = now.subtract(
-      new Duration(days: daysToSubtract, hours: now.hour, minutes: now.minute));
-  return beginningOfChart;
 }
