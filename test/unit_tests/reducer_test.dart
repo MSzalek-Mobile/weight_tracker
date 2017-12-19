@@ -237,6 +237,17 @@ void main() {
     //then
     expect(newState.removedEntryState.lastRemovedEntry, entry);
   });
+
+  test("ChangeDaysToShowOnChart changes daysToShow", () {
+    int newValue = 10;
+    ReduxState initialState = new ReduxState();
+    expect(initialState.progressChartState.daysToShow, isNot(newValue));
+    ChangeDaysToShowOnChart action = new ChangeDaysToShowOnChart(newValue);
+    //when
+    ReduxState newState = reduce(initialState, action);
+    //then
+    expect(newState.progressChartState.daysToShow, newValue);
+  });
 }
 
 WeightEntry createEntry(String key, DateTime dateTime, double weight,

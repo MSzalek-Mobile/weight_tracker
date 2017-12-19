@@ -86,7 +86,7 @@ class StatisticsPage extends StatelessWidget {
               child: new _StatisticCardWrapper(
                 child: new Padding(
                     padding: new EdgeInsets.all(8.0),
-                    child: new ProgressChart(viewModel.entries)),
+                    child: new ProgressChart()),
                 height: 200.0,
               ),
             ),

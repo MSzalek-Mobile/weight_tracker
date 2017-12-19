@@ -2,15 +2,15 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
+import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 
 class ProgressChart extends StatefulWidget {
-  final List<WeightEntry> entries;
-
-  ProgressChart(this.entries);
+  ProgressChart();
 
   @override
   State<StatefulWidget> createState() {
@@ -18,30 +18,51 @@ class ProgressChart extends StatefulWidget {
   }
 }
 
+class ProgressChartViewModel {
+  final List<WeightEntry> entriesToShow;
+  final int daysToShow;
+  final Function(int) changeDaysToShow;
+
+  ProgressChartViewModel(
+      {this.entriesToShow, this.daysToShow, this.changeDaysToShow});
+}
+
 class ProgressChartState extends State<ProgressChart> {
-  int numberOfDays = 31;
-  int previousNumOfDays;
+  int currentNumberOfDays;
 
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onScaleStart: (scaleDetails) =>
-          setState(() => previousNumOfDays = numberOfDays),
-      onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
-        setState(() {
-          int newNumberOfDays =
-          (previousNumOfDays / scaleDetails.scale).round();
-          if (newNumberOfDays >= 8) {
-            numberOfDays = newNumberOfDays;
-          }
-        });
+    return new StoreConnector<ReduxState, ProgressChartViewModel>(
+      converter: (store) {
+        int daysToShow = store.state.progressChartState.daysToShow;
+        currentNumberOfDays = daysToShow;
+        return new ProgressChartViewModel(
+          entriesToShow: utils.prepareEntryList(
+              store.state.entries, new DateTime.now(), daysToShow),
+          daysToShow: daysToShow,
+        );
       },
-      child: new CustomPaint(
-        painter: new ChartPainter(
-            utils.prepareEntryList(
-                widget.entries, new DateTime.now(), numberOfDays),
-            numberOfDays),
-      ),
+      builder: (BuildContext context, ProgressChartViewModel viewModel) {
+        return new GestureDetector(
+          onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
+            setState(() {
+              int newNumberOfDays =
+              (viewModel.daysToShow / scaleDetails.scale).round();
+              if (newNumberOfDays >= 8) {
+                currentNumberOfDays = newNumberOfDays;
+              }
+            });
+          },
+          onScaleEnd: (scaleDetails) =>
+              setState(() => viewModel.changeDaysToShow(currentNumberOfDays)),
+          child: new CustomPaint(
+            painter: new ChartPainter(
+                utils.prepareEntryList(viewModel.entriesToShow,
+                    new DateTime.now(), currentNumberOfDays),
+                currentNumberOfDays),
+          ),
+        );
+      },
     );
   }
 }
@@ -87,8 +108,8 @@ class ChartPainter extends CustomPainter {
     final paint = new Paint()
       ..color = Colors.blue[400]
       ..strokeWidth = 3.0;
-    DateTime beginningOfChart = utils.getStartDateOfChart(
-        new DateTime.now(), numberOfDays);
+    DateTime beginningOfChart =
+    utils.getStartDateOfChart(new DateTime.now(), numberOfDays);
     for (int i = 0; i < entries.length - 1; i++) {
       Offset startEntryOffset = _getEntryOffset(
           entries[i], beginningOfChart, minLineValue, maxLineValue);

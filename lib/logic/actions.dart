@@ -84,3 +84,9 @@ class OpenEditEntryDialog {
 
   OpenEditEntryDialog(this.weightEntry);
 }
+
+class ChangeDaysToShowOnChart {
+  final int daysToShow;
+
+  ChangeDaysToShowOnChart(this.daysToShow);
+}
