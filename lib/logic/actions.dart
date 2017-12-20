@@ -87,7 +87,7 @@ class OpenEditEntryDialog {
 
 class SnapShotDaysToShow {}
 
-class EndGestureOnProgress {}
+class EndGestureOnProgressChart {}
 
 class ChangeDaysToShowOnChart {
   final int daysToShow;

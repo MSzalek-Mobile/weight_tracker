@@ -118,7 +118,7 @@ ProgressChartState _reduceChartState(ReduxState state, action) {
     }
   } else if (action is SnapShotDaysToShow) {
     newState = newState.copyWith(previousDaysToShow: newState.daysToShow);
-  } else if (action is EndGestureOnProgress) {
+  } else if (action is EndGestureOnProgressChart) {
     newState = newState.copyWith(
         previousDaysToShow: newState.daysToShow,
         lastFinishedDateTime: new DateTime.now());

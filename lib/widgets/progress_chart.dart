@@ -18,12 +18,14 @@ class ProgressChartViewModel {
   final Function() snapShotDaysToShow;
   final Function() endGesture;
 
-  ProgressChartViewModel({this.entriesToShow,
+  ProgressChartViewModel({
+    this.entriesToShow,
     this.daysToShow,
     this.previousDaysToShow,
     this.changeDaysToShow,
     this.snapShotDaysToShow,
-    this.endGesture,});
+    this.endGesture,
+  });
 }
 
 class ProgressChart extends StatelessWidget {
@@ -40,32 +42,20 @@ class ProgressChart extends StatelessWidget {
           snapShotDaysToShow: () => store.dispatch(new SnapShotDaysToShow()),
           changeDaysToShow: (days) =>
               store.dispatch(new ChangeDaysToShowOnChart(days)),
-          endGesture: () => store.dispatch(new EndGestureOnProgress()),
+          endGesture: () => store.dispatch(new EndGestureOnProgressChart()),
         );
       },
       builder: (BuildContext context, ProgressChartViewModel viewModel) {
-        //print("Total: " + viewModel.daysToShow.toString());
         return new GestureDetector(
-          onScaleStart: (details) {
-            viewModel.snapShotDaysToShow();
-            print("Start " + viewModel.daysToShow.toString() + " " + viewModel
-                .previousDaysToShow.toString());
-          },
+          onScaleStart: (details) => viewModel.snapShotDaysToShow(),
           onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
-            int newNumberOfDays = (viewModel.previousDaysToShow / scaleDetails
-                .scale).round();
+            int newNumberOfDays =
+            (viewModel.previousDaysToShow / scaleDetails.scale).round();
             if (newNumberOfDays >= 8) {
               viewModel.changeDaysToShow(newNumberOfDays);
             }
-            print("update " + viewModel.daysToShow.toString() + " " + viewModel
-                .previousDaysToShow.toString());
           },
-          onScaleEnd: (details) {
-            viewModel.endGesture();
-            this.build(context);
-            print("end " + viewModel.daysToShow.toString() + " " + viewModel
-                .previousDaysToShow.toString());
-          },
+          onScaleEnd: (details) => viewModel.endGesture(),
           child: new CustomPaint(
             painter: new ChartPainter(
                 utils.prepareEntryList(viewModel.entriesToShow,
