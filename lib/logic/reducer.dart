@@ -111,7 +111,17 @@ List<WeightEntry> _reduceEntries(ReduxState state, action) {
 ProgressChartState _reduceChartState(ReduxState state, action) {
   ProgressChartState newState = state.progressChartState;
   if (action is ChangeDaysToShowOnChart) {
-    newState = new ProgressChartState(daysToShow: action.daysToShow);
+    if (newState.lastFinishedDateTime == null ||
+        newState.lastFinishedDateTime.isBefore(
+            new DateTime.now().subtract(const Duration(milliseconds: 10)))) {
+      newState = newState.copyWith(daysToShow: action.daysToShow);
+    }
+  } else if (action is SnapShotDaysToShow) {
+    newState = newState.copyWith(previousDaysToShow: newState.daysToShow);
+  } else if (action is EndGestureOnProgress) {
+    newState = newState.copyWith(
+        previousDaysToShow: newState.daysToShow,
+        lastFinishedDateTime: new DateTime.now());
   }
   return newState;
 }

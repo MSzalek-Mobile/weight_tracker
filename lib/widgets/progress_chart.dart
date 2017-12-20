@@ -5,61 +5,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
+import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 
-class ProgressChart extends StatefulWidget {
-  ProgressChart();
-
-  @override
-  State<StatefulWidget> createState() {
-    return new ProgressChartState();
-  }
-}
-
 class ProgressChartViewModel {
   final List<WeightEntry> entriesToShow;
   final int daysToShow;
+  final int previousDaysToShow;
   final Function(int) changeDaysToShow;
+  final Function() snapShotDaysToShow;
+  final Function() endGesture;
 
-  ProgressChartViewModel(
-      {this.entriesToShow, this.daysToShow, this.changeDaysToShow});
+  ProgressChartViewModel({this.entriesToShow,
+    this.daysToShow,
+    this.previousDaysToShow,
+    this.changeDaysToShow,
+    this.snapShotDaysToShow,
+    this.endGesture,});
 }
 
-class ProgressChartState extends State<ProgressChart> {
-  int currentNumberOfDays;
-
+class ProgressChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, ProgressChartViewModel>(
       converter: (store) {
         int daysToShow = store.state.progressChartState.daysToShow;
-        currentNumberOfDays = daysToShow;
         return new ProgressChartViewModel(
           entriesToShow: utils.prepareEntryList(
               store.state.entries, new DateTime.now(), daysToShow),
           daysToShow: daysToShow,
+          previousDaysToShow: store.state.progressChartState.previousDaysToShow,
+          snapShotDaysToShow: () => store.dispatch(new SnapShotDaysToShow()),
+          changeDaysToShow: (days) =>
+              store.dispatch(new ChangeDaysToShowOnChart(days)),
+          endGesture: () => store.dispatch(new EndGestureOnProgress()),
         );
       },
       builder: (BuildContext context, ProgressChartViewModel viewModel) {
+        //print("Total: " + viewModel.daysToShow.toString());
         return new GestureDetector(
-          onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
-            setState(() {
-              int newNumberOfDays =
-              (viewModel.daysToShow / scaleDetails.scale).round();
-              if (newNumberOfDays >= 8) {
-                currentNumberOfDays = newNumberOfDays;
-              }
-            });
+          onScaleStart: (details) {
+            viewModel.snapShotDaysToShow();
+            print("Start " + viewModel.daysToShow.toString() + " " + viewModel
+                .previousDaysToShow.toString());
           },
-          onScaleEnd: (scaleDetails) =>
-              setState(() => viewModel.changeDaysToShow(currentNumberOfDays)),
+          onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
+            int newNumberOfDays = (viewModel.previousDaysToShow / scaleDetails
+                .scale).round();
+            if (newNumberOfDays >= 8) {
+              viewModel.changeDaysToShow(newNumberOfDays);
+            }
+            print("update " + viewModel.daysToShow.toString() + " " + viewModel
+                .previousDaysToShow.toString());
+          },
+          onScaleEnd: (details) {
+            viewModel.endGesture();
+            this.build(context);
+            print("end " + viewModel.daysToShow.toString() + " " + viewModel
+                .previousDaysToShow.toString());
+          },
           child: new CustomPaint(
             painter: new ChartPainter(
                 utils.prepareEntryList(viewModel.entriesToShow,
-                    new DateTime.now(), currentNumberOfDays),
-                currentNumberOfDays),
+                    new DateTime.now(), viewModel.daysToShow),
+                viewModel.daysToShow),
           ),
         );
       },

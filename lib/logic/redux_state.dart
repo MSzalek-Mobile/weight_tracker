@@ -47,8 +47,20 @@ class ReduxState {
 @immutable
 class ProgressChartState {
   final int daysToShow;
+  final int previousDaysToShow;
+  final DateTime lastFinishedDateTime;
 
-  const ProgressChartState({this.daysToShow = 31});
+  const ProgressChartState(
+      {this.daysToShow = 31, this.previousDaysToShow = 31, this.lastFinishedDateTime});
+
+  ProgressChartState copyWith(
+      {int daysToShow, int previousDaysToShow, DateTime lastFinishedDateTime}) {
+    return new ProgressChartState(
+      daysToShow: daysToShow ?? this.daysToShow,
+      previousDaysToShow: previousDaysToShow ?? this.previousDaysToShow,
+      lastFinishedDateTime: lastFinishedDateTime ?? this.lastFinishedDateTime,
+    );
+  }
 }
 
 @immutable
