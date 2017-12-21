@@ -59,7 +59,8 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
             isEditMode: store.state.weightEntryDialogState.isEditMode,
             weightToDisplay: store.state.unit == "kg"
                 ? activeEntry.weight
-                : activeEntry.weight * KG_LBS_RATIO,
+                : double.parse(
+                (activeEntry.weight * KG_LBS_RATIO).toStringAsFixed(1)),
             onEntryChanged: (entry) =>
                 store.dispatch(new UpdateActiveWeightEntry(entry)),
             onDeletePressed: () {
@@ -166,8 +167,8 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
     showDialog(
       context: context,
       child: new NumberPickerDialog.decimal(
-        minValue: 1,
-        maxValue: 300,
+        minValue: viewModel.unit == "kg" ? 5 : (5 * KG_LBS_RATIO).toInt(),
+        maxValue: viewModel.unit == "kg" ? 200 : (200 * KG_LBS_RATIO).toInt(),
         initialDoubleValue: viewModel.weightToDisplay,
         title: new Text("Enter your weight"),
       ),
