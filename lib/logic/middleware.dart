@@ -9,7 +9,7 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 middleware(Store<ReduxState> store, action, NextDispatcher next) {
-  print(action.runtimeType);
+  //print(action.runtimeType);
   if (action is InitAction) {
     _handleInitAction(store);
   } else if (action is AddEntryAction) {

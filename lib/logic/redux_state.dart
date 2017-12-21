@@ -11,6 +11,7 @@ class ReduxState {
   final WeightEntryDialogReduxState weightEntryDialogState;
   final FirebaseState firebaseState;
   final MainPageReduxState mainPageState;
+  final ProgressChartState progressChartState;
 
   const ReduxState({
     this.firebaseState = const FirebaseState(),
@@ -19,14 +20,18 @@ class ReduxState {
     this.unit = 'kg',
     this.removedEntryState = const RemovedEntryState(),
     this.weightEntryDialogState = const WeightEntryDialogReduxState(),
+    this.progressChartState = const ProgressChartState(),
   });
 
-  ReduxState copyWith({FirebaseState firebaseState,
-      List<WeightEntry> entries,
-      bool hasEntryBeenAdded,
-      String unit,
+  ReduxState copyWith({
+    FirebaseState firebaseState,
+    List<WeightEntry> entries,
+    bool hasEntryBeenAdded,
+    String unit,
     RemovedEntryState removedEntryState,
-    WeightEntryDialogReduxState weightEntryDialogState}) {
+    WeightEntryDialogReduxState weightEntryDialogState,
+    ProgressChartState progressChartState,
+  }) {
     return new ReduxState(
         firebaseState: firebaseState ?? this.firebaseState,
         entries: entries ?? this.entries,
@@ -34,7 +39,27 @@ class ReduxState {
         unit: unit ?? this.unit,
         weightEntryDialogState:
         weightEntryDialogState ?? this.weightEntryDialogState,
-        removedEntryState: removedEntryState ?? this.removedEntryState);
+        removedEntryState: removedEntryState ?? this.removedEntryState,
+        progressChartState: progressChartState ?? this.progressChartState);
+  }
+}
+
+@immutable
+class ProgressChartState {
+  final int daysToShow;
+  final int previousDaysToShow;
+  final DateTime lastFinishedDateTime;
+
+  const ProgressChartState(
+      {this.daysToShow = 31, this.previousDaysToShow = 31, this.lastFinishedDateTime});
+
+  ProgressChartState copyWith(
+      {int daysToShow, int previousDaysToShow, DateTime lastFinishedDateTime}) {
+    return new ProgressChartState(
+      daysToShow: daysToShow ?? this.daysToShow,
+      previousDaysToShow: previousDaysToShow ?? this.previousDaysToShow,
+      lastFinishedDateTime: lastFinishedDateTime ?? this.lastFinishedDateTime,
+    );
   }
 }
 

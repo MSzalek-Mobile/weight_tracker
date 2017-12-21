@@ -2,46 +2,74 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
+import 'package:weight_tracker/logic/actions.dart';
+import 'package:weight_tracker/logic/constants.dart';
+import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 
-class ProgressChart extends StatefulWidget {
-  final List<WeightEntry> entries;
+class ProgressChartViewModel {
+  final List<WeightEntry> entriesToShow;
+  final int daysToShow;
+  final int previousDaysToShow;
+  final Function(int) changeDaysToShow;
+  final Function() snapShotDaysToShow;
+  final Function() endGesture;
+  final String unit;
 
-  ProgressChart(this.entries);
-
-  @override
-  State<StatefulWidget> createState() {
-    return new ProgressChartState();
-  }
+  ProgressChartViewModel({
+    this.entriesToShow,
+    this.daysToShow,
+    this.previousDaysToShow,
+    this.changeDaysToShow,
+    this.snapShotDaysToShow,
+    this.endGesture,
+    this.unit,
+  });
 }
 
-class ProgressChartState extends State<ProgressChart> {
-  int numberOfDays = 31;
-  int previousNumOfDays;
-
+class ProgressChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onScaleStart: (scaleDetails) =>
-          setState(() => previousNumOfDays = numberOfDays),
-      onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
-        setState(() {
-          int newNumberOfDays =
-          (previousNumOfDays / scaleDetails.scale).round();
-          if (newNumberOfDays >= 8) {
-            numberOfDays = newNumberOfDays;
-          }
-        });
+    return new StoreConnector<ReduxState, ProgressChartViewModel>(
+      converter: (store) {
+        int daysToShow = store.state.progressChartState.daysToShow;
+        return new ProgressChartViewModel(
+          entriesToShow: utils.prepareEntryList(
+              store.state.entries, new DateTime.now(), daysToShow),
+          daysToShow: daysToShow,
+          previousDaysToShow: store.state.progressChartState.previousDaysToShow,
+          snapShotDaysToShow: () => store.dispatch(new SnapShotDaysToShow()),
+          changeDaysToShow: (days) =>
+              store.dispatch(new ChangeDaysToShowOnChart(days)),
+          endGesture: () => store.dispatch(new EndGestureOnProgressChart()),
+          unit: store.state.unit,
+        );
       },
-      child: new CustomPaint(
-        painter: new ChartPainter(
-            utils.prepareEntryList(
-                widget.entries, new DateTime.now(), numberOfDays),
-            numberOfDays),
-      ),
+      builder: (BuildContext context, ProgressChartViewModel viewModel) {
+        return new GestureDetector(
+          onScaleStart: (details) => viewModel.snapShotDaysToShow(),
+          onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
+            int newNumberOfDays =
+            (viewModel.previousDaysToShow / scaleDetails.scale).round();
+            if (newNumberOfDays >= 8) {
+              viewModel.changeDaysToShow(newNumberOfDays);
+            }
+          },
+          onScaleEnd: (details) => viewModel.endGesture(),
+          child: new CustomPaint(
+            painter: new ChartPainter(
+              utils.prepareEntryList(viewModel.entriesToShow,
+                  new DateTime.now(), viewModel.daysToShow),
+              viewModel.daysToShow,
+              viewModel.unit == "lbs",
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -49,8 +77,9 @@ class ProgressChartState extends State<ProgressChart> {
 class ChartPainter extends CustomPainter {
   final List<WeightEntry> entries;
   final int numberOfDays;
+  final bool isLbs;
 
-  ChartPainter(this.entries, this.numberOfDays);
+  ChartPainter(this.entries, this.numberOfDays, this.isLbs);
 
   double leftOffsetStart;
   double topOffsetEnd;
@@ -70,12 +99,12 @@ class ChartPainter extends CustomPainter {
       _drawParagraphInsteadOfChart(
           canvas, size, "Add your current weight to see history");
     } else {
-      Tuple2<int, int> borderLineValues = _getMinAndMaxValues(entries);
+      Tuple2<int, int> borderLineValues = _getMinAndMaxValues(entries, isLbs);
       _drawHorizontalLinesAndLabels(
           canvas, size, borderLineValues.item1, borderLineValues.item2);
       _drawBottomLabels(canvas, size);
 
-      _drawLines(canvas, borderLineValues.item1, borderLineValues.item2);
+      _drawLines(canvas, borderLineValues.item1, borderLineValues.item2, isLbs);
     }
   }
 
@@ -83,23 +112,24 @@ class ChartPainter extends CustomPainter {
   bool shouldRepaint(ChartPainter old) => true;
 
   ///draws actual chart
-  void _drawLines(ui.Canvas canvas, int minLineValue, int maxLineValue) {
+  void _drawLines(ui.Canvas canvas, int minLineValue, int maxLineValue,
+      bool isLbs) {
     final paint = new Paint()
       ..color = Colors.blue[400]
       ..strokeWidth = 3.0;
-    DateTime beginningOfChart = utils.getStartDateOfChart(
-        new DateTime.now(), numberOfDays);
+    DateTime beginningOfChart =
+    utils.getStartDateOfChart(new DateTime.now(), numberOfDays);
     for (int i = 0; i < entries.length - 1; i++) {
       Offset startEntryOffset = _getEntryOffset(
-          entries[i], beginningOfChart, minLineValue, maxLineValue);
+          entries[i], beginningOfChart, minLineValue, maxLineValue, isLbs);
       Offset endEntryOffset = _getEntryOffset(
-          entries[i + 1], beginningOfChart, minLineValue, maxLineValue);
+          entries[i + 1], beginningOfChart, minLineValue, maxLineValue, isLbs);
       canvas.drawLine(startEntryOffset, endEntryOffset, paint);
       canvas.drawCircle(endEntryOffset, 3.0, paint);
     }
     canvas.drawCircle(
         _getEntryOffset(
-            entries.first, beginningOfChart, minLineValue, maxLineValue),
+            entries.first, beginningOfChart, minLineValue, maxLineValue, isLbs),
         5.0,
         paint);
   }
@@ -194,10 +224,14 @@ class ChartPainter extends CustomPainter {
   }
 
   ///Produces minimal and maximal value of horizontal line that will be displayed
-  Tuple2<int, int> _getMinAndMaxValues(List<WeightEntry> entries) {
+  Tuple2<int, int> _getMinAndMaxValues(List<WeightEntry> entries, bool isLbs) {
     double maxWeight = entries.map((entry) => entry.weight).reduce(math.max);
     double minWeight = entries.map((entry) => entry.weight).reduce(math.min);
 
+    if (isLbs) {
+      maxWeight *= KG_LBS_RATIO;
+      minWeight *= KG_LBS_RATIO;
+    }
     int maxLineValue;
     int minLineValue;
 
@@ -219,14 +253,16 @@ class ChartPainter extends CustomPainter {
 
   /// Calculates offset at which given entry should be painted
   Offset _getEntryOffset(WeightEntry entry, DateTime beginningOfChart,
-      int minLineValue, int maxLineValue) {
+      int minLineValue, int maxLineValue, bool isLbs) {
+    double entryWeightToShow =
+    isLbs ? entry.weight * KG_LBS_RATIO : entry.weight;
     int daysFromBeginning = entry.dateTime
         .difference(beginningOfChart)
         .inDays;
-    double relativeXposition = daysFromBeginning / numberOfDays;
+    double relativeXposition = daysFromBeginning / (numberOfDays - 1);
     double xOffset = leftOffsetStart + relativeXposition * drawingWidth;
     double relativeYposition =
-        (entry.weight - minLineValue) / (maxLineValue - minLineValue);
+        (entryWeightToShow - minLineValue) / (maxLineValue - minLineValue);
     double yOffset = 5 + drawingHeight - relativeYposition * drawingHeight;
     return new Offset(xOffset, yOffset);
   }

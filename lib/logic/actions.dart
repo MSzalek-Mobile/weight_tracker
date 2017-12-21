@@ -84,3 +84,13 @@ class OpenEditEntryDialog {
 
   OpenEditEntryDialog(this.weightEntry);
 }
+
+class SnapShotDaysToShow {}
+
+class EndGestureOnProgressChart {}
+
+class ChangeDaysToShowOnChart {
+  final int daysToShow;
+
+  ChangeDaysToShowOnChart(this.daysToShow);
+}

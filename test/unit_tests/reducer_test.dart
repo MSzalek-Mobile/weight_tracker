@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:mockito/mockito.dart';
@@ -148,8 +150,8 @@ void main() {
   test('reducer OpenAddEntryDialog sets EditMode to false', () {
     //given
     ReduxState initialState = new ReduxState(
-        weightEntryDialogState: new WeightEntryDialogReduxState(
-            isEditMode: true));
+        weightEntryDialogState:
+        new WeightEntryDialogReduxState(isEditMode: true));
     OpenAddEntryDialog action = new OpenAddEntryDialog();
     //when
     ReduxState newState = reduce(initialState, action);
@@ -206,8 +208,7 @@ void main() {
   test('reducer OnRemovedAction sets hasEntryBeenRemoved to true', () {
     //given
     WeightEntry entry = createEntry("key", new DateTime.now(), 60.0, null);
-    ReduxState initialState =
-    new ReduxState(entries: [entry]);
+    ReduxState initialState = new ReduxState(entries: [entry]);
     OnRemovedAction action = new OnRemovedAction(createEventMock(entry));
     //when
     ReduxState newState = reduce(initialState, action);
@@ -229,13 +230,78 @@ void main() {
   test('reducer OnRemovedAction sets lastRemovedEntry', () {
     //given
     WeightEntry entry = createEntry("key", new DateTime.now(), 60.0, null);
-    ReduxState initialState =
-    new ReduxState(entries: [entry]);
+    ReduxState initialState = new ReduxState(entries: [entry]);
     OnRemovedAction action = new OnRemovedAction(createEventMock(entry));
     //when
     ReduxState newState = reduce(initialState, action);
     //then
     expect(newState.removedEntryState.lastRemovedEntry, entry);
+  });
+
+  test("ChangeDaysToShowOnChart changes daysToShow", () {
+    //given
+    int newValue = 10;
+    ReduxState initialState = new ReduxState();
+    expect(initialState.progressChartState.daysToShow, isNot(newValue));
+    ChangeDaysToShowOnChart action = new ChangeDaysToShowOnChart(newValue);
+    //when
+    ReduxState newState = reduce(initialState, action);
+    //then
+    expect(newState.progressChartState.daysToShow, newValue);
+  });
+
+  test("SnapShotDaysToShow copies daysToShow to previousDaysToShow", () {
+    //given
+    ReduxState initialState = new ReduxState(
+        progressChartState:
+        new ProgressChartState(daysToShow: 10, previousDaysToShow: 20));
+    SnapShotDaysToShow action = new SnapShotDaysToShow();
+    //when
+    ReduxState newState = reduce(initialState, action);
+    //then
+    expect(newState.progressChartState.previousDaysToShow, 10);
+  });
+
+  test("EndGestureOnProgressChart updates lastFinishedDateTime", () {
+    //given
+    ReduxState initialState = new ReduxState();
+    expect(initialState.progressChartState.lastFinishedDateTime, isNull);
+    EndGestureOnProgressChart action = new EndGestureOnProgressChart();
+    //when
+    ReduxState newState = reduce(initialState, action);
+    //then
+    expect(newState.progressChartState.lastFinishedDateTime, isNotNull);
+  });
+
+  test("ChangeDaysToShow after endGesture doesnt change daysToShow", () {
+    //given
+    ReduxState initialState = new ReduxState(
+        progressChartState: new ProgressChartState(daysToShow: 31));
+    EndGestureOnProgressChart endAction = new EndGestureOnProgressChart();
+    SnapShotDaysToShow startAction = new SnapShotDaysToShow();
+    ChangeDaysToShowOnChart updateAction = new ChangeDaysToShowOnChart(10);
+    //when
+    ReduxState state1 = reduce(initialState, endAction);
+    ReduxState state2 = reduce(state1, startAction);
+    ReduxState state3 = reduce(state2, updateAction);
+    //then
+    expect(state3.progressChartState.daysToShow, 31);
+  });
+
+  test("ChangeDaysToShow after 10ms after endGesture changes daysToShow", () {
+    //given
+    ReduxState initialState = new ReduxState(
+        progressChartState: new ProgressChartState(daysToShow: 31));
+    EndGestureOnProgressChart endAction = new EndGestureOnProgressChart();
+    SnapShotDaysToShow startAction = new SnapShotDaysToShow();
+    ChangeDaysToShowOnChart updateAction = new ChangeDaysToShowOnChart(10);
+    //when
+    ReduxState state1 = reduce(initialState, endAction);
+    ReduxState state2 = reduce(state1, startAction);
+    sleep(const Duration(milliseconds: 10));
+    ReduxState state3 = reduce(state2, updateAction);
+    //then
+    expect(state3.progressChartState.daysToShow, 10);
   });
 }
 

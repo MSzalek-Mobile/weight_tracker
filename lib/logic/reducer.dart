@@ -4,23 +4,25 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 ReduxState reduce(ReduxState state, action) {
-  List<WeightEntry> entries = reduceEntries(state, action);
-  String unit = reduceUnit(state, action);
-  RemovedEntryState removedEntryState = reduceRemovedEntryState(state, action);
+  List<WeightEntry> entries = _reduceEntries(state, action);
+  String unit = _reduceUnit(state, action);
+  RemovedEntryState removedEntryState = _reduceRemovedEntryState(state, action);
   WeightEntryDialogReduxState weightEntryDialogState =
-  reduceWeightEntryDialogState(state, action);
-  FirebaseState firebaseState = reduceFirebaseState(state, action);
-  MainPageReduxState mainPageState = reduceMainPageState(state, action);
+  _reduceWeightEntryDialogState(state, action);
+  FirebaseState firebaseState = _reduceFirebaseState(state, action);
+  MainPageReduxState mainPageState = _reduceMainPageState(state, action);
+  ProgressChartState progressChartState = _reduceChartState(state, action);
   return new ReduxState(
       entries: entries,
       unit: unit,
       removedEntryState: removedEntryState,
       weightEntryDialogState: weightEntryDialogState,
       firebaseState: firebaseState,
-      mainPageState: mainPageState);
+      mainPageState: mainPageState,
+      progressChartState: progressChartState);
 }
 
-String reduceUnit(ReduxState reduxState, action) {
+String _reduceUnit(ReduxState reduxState, action) {
   String unit = reduxState.unit;
   if (action is OnUnitChangedAction) {
     unit = action.unit;
@@ -28,7 +30,7 @@ String reduceUnit(ReduxState reduxState, action) {
   return unit;
 }
 
-MainPageReduxState reduceMainPageState(ReduxState reduxState, action) {
+MainPageReduxState _reduceMainPageState(ReduxState reduxState, action) {
   MainPageReduxState newMainPageState = reduxState.mainPageState;
   if (action is AcceptEntryAddedAction) {
     newMainPageState = newMainPageState.copyWith(hasEntryBeenAdded: false);
@@ -38,7 +40,7 @@ MainPageReduxState reduceMainPageState(ReduxState reduxState, action) {
   return newMainPageState;
 }
 
-FirebaseState reduceFirebaseState(ReduxState reduxState, action) {
+FirebaseState _reduceFirebaseState(ReduxState reduxState, action) {
   FirebaseState newState = reduxState.firebaseState;
   if (action is InitAction) {
     FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -50,7 +52,7 @@ FirebaseState reduceFirebaseState(ReduxState reduxState, action) {
   return newState;
 }
 
-RemovedEntryState reduceRemovedEntryState(ReduxState reduxState, action) {
+RemovedEntryState _reduceRemovedEntryState(ReduxState reduxState, action) {
   RemovedEntryState newState = reduxState.removedEntryState;
   if (action is AcceptEntryRemovalAction) {
     newState = newState.copyWith(hasEntryBeenRemoved: false);
@@ -62,7 +64,7 @@ RemovedEntryState reduceRemovedEntryState(ReduxState reduxState, action) {
   return newState;
 }
 
-WeightEntryDialogReduxState reduceWeightEntryDialogState(ReduxState reduxState,
+WeightEntryDialogReduxState _reduceWeightEntryDialogState(ReduxState reduxState,
     action) {
   WeightEntryDialogReduxState newState = reduxState.weightEntryDialogState;
   if (action is UpdateActiveWeightEntry) {
@@ -82,7 +84,7 @@ WeightEntryDialogReduxState reduceWeightEntryDialogState(ReduxState reduxState,
   return newState;
 }
 
-List<WeightEntry> reduceEntries(ReduxState state, action) {
+List<WeightEntry> _reduceEntries(ReduxState state, action) {
   List<WeightEntry> entries = new List.from(state.entries);
   if (action is OnAddedAction) {
     entries
@@ -103,4 +105,23 @@ List<WeightEntry> reduceEntries(ReduxState state, action) {
       ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
   }
   return entries;
+}
+
+/// I don't check if values have sense (e.g. if they are greater than 0) - let it be ;)
+ProgressChartState _reduceChartState(ReduxState state, action) {
+  ProgressChartState newState = state.progressChartState;
+  if (action is ChangeDaysToShowOnChart) {
+    if (newState.lastFinishedDateTime == null ||
+        newState.lastFinishedDateTime.isBefore(
+            new DateTime.now().subtract(const Duration(milliseconds: 10)))) {
+      newState = newState.copyWith(daysToShow: action.daysToShow);
+    }
+  } else if (action is SnapShotDaysToShow) {
+    newState = newState.copyWith(previousDaysToShow: newState.daysToShow);
+  } else if (action is EndGestureOnProgressChart) {
+    newState = newState.copyWith(
+        previousDaysToShow: newState.daysToShow,
+        lastFinishedDateTime: new DateTime.now());
+  }
+  return newState;
 }
