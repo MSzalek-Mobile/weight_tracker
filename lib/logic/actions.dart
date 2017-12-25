@@ -14,6 +14,15 @@ class AddDatabaseReferenceAction {
   AddDatabaseReferenceAction(this.databaseReference);
 }
 
+class AddWeightFromNotes {
+  final double weight;
+
+  AddWeightFromNotes(this.weight);
+}
+
+class ConsumeWeightFromNotes {
+}
+
 class AddEntryAction {
   final WeightEntry weightEntry;
 

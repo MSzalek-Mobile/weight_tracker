@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
+import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/screens/history_page.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
@@ -11,11 +13,13 @@ class MainPageViewModel {
   final double defaultWeight;
   final bool hasEntryBeenAdded;
   final String unit;
-  final Function() addEntryFunction;
+  final Function(WeightEntry) addEntry;
+  final Function() openAddEntryDialog;
   final Function() acceptEntryAddedCallback;
 
   MainPageViewModel({
-    this.addEntryFunction,
+    this.addEntry,
+    this.openAddEntryDialog,
     this.defaultWeight,
     this.hasEntryBeenAdded,
     this.acceptEntryAddedCallback,
@@ -63,7 +67,7 @@ class MainPageState extends State<MainPage>
           hasEntryBeenAdded: store.state.mainPageState.hasEntryBeenAdded,
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
-          addEntryFunction: () {
+          openAddEntryDialog: () {
             store.dispatch(new OpenAddEntryDialog());
             Navigator.of(context).push(new MaterialPageRoute(
               builder: (BuildContext context) {
@@ -74,6 +78,10 @@ class MainPageState extends State<MainPage>
           },
           unit: store.state.unit,
         );
+      },
+      onInit: (store) {
+        getSavedNote((number) =>
+            store.dispatch(new AddWeightFromNotes(number)));
       },
       builder: (context, viewModel) {
         if (viewModel.hasEntryBeenAdded) {
@@ -123,13 +131,28 @@ class MainPageState extends State<MainPage>
             ),
           ),
           floatingActionButton: new FloatingActionButton(
-            onPressed: () => viewModel.addEntryFunction(),
+            onPressed: () => viewModel.openAddEntryDialog(),
             tooltip: 'Add new weight entry',
             child: new Icon(Icons.add),
           ),
         );
       },
     );
+  }
+
+  static const platform = const MethodChannel('app.channel.shared.data');
+
+  getSavedNote(Function(double) storeSavedNote) async {
+    String sharedData = await platform.invokeMethod("getSavedNote");
+    if (sharedData != null) {
+      int firstIndex = sharedData.indexOf(new RegExp("[0-9]"));
+      int lastIndex = sharedData.lastIndexOf(new RegExp("[0-9]"));
+      if (firstIndex != -1) {
+        String number = sharedData.substring(firstIndex, lastIndex + 1);
+        double num = double.parse(number, (error) => -1.0);
+        storeSavedNote(num);
+      }
+    }
   }
 
   _scrollToTop() {

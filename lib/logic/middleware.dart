@@ -9,7 +9,7 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 
 middleware(Store<ReduxState> store, action, NextDispatcher next) {
-  //print(action.runtimeType);
+  print(action.runtimeType);
   if (action is InitAction) {
     _handleInitAction(store);
   } else if (action is AddEntryAction) {
@@ -22,10 +22,28 @@ middleware(Store<ReduxState> store, action, NextDispatcher next) {
     _handleUndoRemovalAction(store);
   } else if (action is SetUnitAction) {
     _handleSetUnitAction(action, store);
+  } else if (action is AddWeightFromNotes) {
+    if (store.state.firebaseState?.mainReference != null) {
+      WeightEntry weightEntry = new WeightEntry(
+          new DateTime.now(), action.weight, null);
+      store.dispatch(new AddEntryAction(weightEntry));
+      action = new AddWeightFromNotes(null);
+    }
   }
   next(action);
   if (action is UserLoadedAction) {
     _handleUserLoadedAction(store);
+  } else if (action is AddDatabaseReferenceAction) {
+    _handleAddedDatabaseReference(store);
+  }
+}
+
+_handleAddedDatabaseReference(Store<ReduxState> store) {
+  if (store.state.weightFromNotes != null) {
+    WeightEntry weightEntry = new WeightEntry(
+        new DateTime.now(), store.state.weightFromNotes, null);
+    store.dispatch(new AddEntryAction(weightEntry));
+    store.dispatch(new ConsumeWeightFromNotes());
   }
 }
 _handleUserLoadedAction(Store<ReduxState> store) {
