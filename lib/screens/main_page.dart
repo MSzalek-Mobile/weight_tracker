@@ -11,11 +11,11 @@ class MainPageViewModel {
   final double defaultWeight;
   final bool hasEntryBeenAdded;
   final String unit;
-  final Function() addEntryFunction;
+  final Function() openAddEntryDialog;
   final Function() acceptEntryAddedCallback;
 
   MainPageViewModel({
-    this.addEntryFunction,
+    this.openAddEntryDialog,
     this.defaultWeight,
     this.hasEntryBeenAdded,
     this.acceptEntryAddedCallback,
@@ -63,7 +63,7 @@ class MainPageState extends State<MainPage>
           hasEntryBeenAdded: store.state.mainPageState.hasEntryBeenAdded,
           acceptEntryAddedCallback: () =>
               store.dispatch(new AcceptEntryAddedAction()),
-          addEntryFunction: () {
+          openAddEntryDialog: () {
             store.dispatch(new OpenAddEntryDialog());
             Navigator.of(context).push(new MaterialPageRoute(
               builder: (BuildContext context) {
@@ -74,6 +74,9 @@ class MainPageState extends State<MainPage>
           },
           unit: store.state.unit,
         );
+      },
+      onInit: (store) {
+        store.dispatch(new GetSavedWeightNote());
       },
       builder: (context, viewModel) {
         if (viewModel.hasEntryBeenAdded) {
@@ -123,7 +126,7 @@ class MainPageState extends State<MainPage>
             ),
           ),
           floatingActionButton: new FloatingActionButton(
-            onPressed: () => viewModel.addEntryFunction(),
+            onPressed: () => viewModel.openAddEntryDialog(),
             tooltip: 'Add new weight entry',
             child: new Icon(Icons.add),
           ),

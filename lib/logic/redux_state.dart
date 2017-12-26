@@ -12,6 +12,7 @@ class ReduxState {
   final FirebaseState firebaseState;
   final MainPageReduxState mainPageState;
   final ProgressChartState progressChartState;
+  final double weightFromNotes;
 
   const ReduxState({
     this.firebaseState = const FirebaseState(),
@@ -21,6 +22,7 @@ class ReduxState {
     this.removedEntryState = const RemovedEntryState(),
     this.weightEntryDialogState = const WeightEntryDialogReduxState(),
     this.progressChartState = const ProgressChartState(),
+    this.weightFromNotes,
   });
 
   ReduxState copyWith({

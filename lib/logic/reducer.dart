@@ -12,14 +12,28 @@ ReduxState reduce(ReduxState state, action) {
   FirebaseState firebaseState = _reduceFirebaseState(state, action);
   MainPageReduxState mainPageState = _reduceMainPageState(state, action);
   ProgressChartState progressChartState = _reduceChartState(state, action);
+  double weightFromNotes = _reduceWeightFromNotes(state, action);
+
   return new ReduxState(
-      entries: entries,
-      unit: unit,
-      removedEntryState: removedEntryState,
-      weightEntryDialogState: weightEntryDialogState,
-      firebaseState: firebaseState,
-      mainPageState: mainPageState,
-      progressChartState: progressChartState);
+    entries: entries,
+    unit: unit,
+    removedEntryState: removedEntryState,
+    weightEntryDialogState: weightEntryDialogState,
+    firebaseState: firebaseState,
+    mainPageState: mainPageState,
+    progressChartState: progressChartState,
+    weightFromNotes: weightFromNotes,
+  );
+}
+
+double _reduceWeightFromNotes(ReduxState state, action) {
+  double weight = state.weightFromNotes;
+  if (action is AddWeightFromNotes) {
+    weight = action.weight;
+  } else if (action is ConsumeWeightFromNotes) {
+    weight = null;
+  }
+  return weight;
 }
 
 String _reduceUnit(ReduxState reduxState, action) {

@@ -96,4 +96,73 @@ void main() {
     verify(firebaseMock.child(weightEntry.key)).called(1);
     verify(firebaseMock.set(weightEntry.toJson())).called(1);
   });
+
+  test("Added database calls add entry when weight is saved", () {
+    //given
+    bool wasAddEntryCalled = false;
+    var reducer = (ReduxState state, action) {
+      if (action is AddEntryAction) {
+        wasAddEntryCalled = true;
+      }
+      return state;
+    };
+    DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
+    when(databaseReferenceMock.child(any)).thenReturn(databaseReferenceMock);
+    when(databaseReferenceMock.push()).thenReturn(databaseReferenceMock);
+    ReduxState state = new ReduxState(
+      weightFromNotes: 70.0,
+      firebaseState: new FirebaseState(mainReference: databaseReferenceMock),
+    );
+    Store<ReduxState> store = new Store(reducer,
+        initialState: state, middleware: [middleware].toList());
+    //when
+    store.dispatch(new AddDatabaseReferenceAction(databaseReferenceMock));
+    //then
+    expect(wasAddEntryCalled, true);
+  });
+
+  test("Added database calls consume saved weight when weight is saved", () {
+    //given
+    bool wasConsumeSavedWeightCalled = false;
+    var reducer = (ReduxState state, action) {
+      if (action is ConsumeWeightFromNotes) {
+        wasConsumeSavedWeightCalled = true;
+      }
+      return state;
+    };
+    DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
+    when(databaseReferenceMock.child(any)).thenReturn(databaseReferenceMock);
+    when(databaseReferenceMock.push()).thenReturn(databaseReferenceMock);
+    ReduxState state = new ReduxState(
+      weightFromNotes: 70.0,
+      firebaseState: new FirebaseState(mainReference: databaseReferenceMock),
+    );
+    Store<ReduxState> store = new Store(reducer,
+        initialState: state, middleware: [middleware].toList());
+    //when
+    store.dispatch(new AddDatabaseReferenceAction(databaseReferenceMock));
+    //then
+    expect(wasConsumeSavedWeightCalled, true);
+  });
+
+  test("Added database doesnt call consume/add when saved weight is null", () {
+    //given
+    bool wasConsumeOrAddCalled = false;
+    var reducer = (ReduxState state, action) {
+      if (action is ConsumeWeightFromNotes || action is AddEntryAction) {
+        wasConsumeOrAddCalled = true;
+      }
+      return state;
+    };
+    DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
+    ReduxState state = new ReduxState(
+      weightFromNotes: null,
+    );
+    Store<ReduxState> store = new Store(reducer,
+        initialState: state, middleware: [middleware].toList());
+    //when
+    store.dispatch(new AddDatabaseReferenceAction(databaseReferenceMock));
+    //then
+    expect(wasConsumeOrAddCalled, false);
+  });
 }
