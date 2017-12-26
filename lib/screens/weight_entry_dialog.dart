@@ -167,8 +167,12 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
     showDialog(
       context: context,
       child: new NumberPickerDialog.decimal(
-        minValue: viewModel.unit == "kg" ? 5 : (5 * KG_LBS_RATIO).toInt(),
-        maxValue: viewModel.unit == "kg" ? 200 : (200 * KG_LBS_RATIO).toInt(),
+        minValue: viewModel
+            .unit == "kg" ? MIN_KG_VALUE : (MIN_KG_VALUE * KG_LBS_RATIO)
+            .toInt(),
+        maxValue: viewModel
+            .unit == "kg" ? MAX_KG_VALUE : (MAX_KG_VALUE * KG_LBS_RATIO)
+            .toInt(),
         initialDoubleValue: viewModel.weightToDisplay,
         title: new Text("Enter your weight"),
       ),
