@@ -23,7 +23,7 @@ void main() {
     ReduxState state = new ReduxState(
         firebaseState: new FirebaseState(mainReference: firebaseMock));
 
-    Store store = new Store(reducerMock,
+    Store<ReduxState> store = new Store<ReduxState>(reducerMock,
         initialState: state, middleware: [middleware].toList());
 
     WeightEntry weightEntry = new WeightEntry(new DateTime.now(), 70.0, null);
@@ -38,11 +38,11 @@ void main() {
   test('middleware EditEntryAction invokes child and set', () {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
-    when(firebaseMock.child(any)).thenReturn(firebaseMock);
+    when(firebaseMock.child(typed(any))).thenReturn(firebaseMock);
     ReduxState state = new ReduxState(
         firebaseState: new FirebaseState(mainReference: firebaseMock));
 
-    Store store = new Store(reducerMock,
+    Store<ReduxState> store = new Store<ReduxState>(reducerMock,
         initialState: state, middleware: [middleware].toList());
 
     WeightEntry weightEntry = new WeightEntry(new DateTime.now(), 70.0, null)
@@ -58,11 +58,11 @@ void main() {
   test('middleware RemoveEntryAction invokes child and remove', () {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
-    when(firebaseMock.child(any)).thenReturn(firebaseMock);
+    when(firebaseMock.child(typed(any))).thenReturn(firebaseMock);
     ReduxState state = new ReduxState(
         firebaseState: new FirebaseState(mainReference: firebaseMock));
 
-    Store store = new Store(reducerMock,
+    Store<ReduxState> store = new Store<ReduxState>(reducerMock,
         initialState: state, middleware: [middleware].toList());
 
     WeightEntry weightEntry = new WeightEntry(new DateTime.now(), 70.0, null)
@@ -86,7 +86,7 @@ void main() {
       removedEntryState: new RemovedEntryState(lastRemovedEntry: weightEntry),
     );
 
-    Store store = new Store(reducerMock,
+    Store<ReduxState> store = new Store<ReduxState>(reducerMock,
         initialState: state, middleware: [middleware].toList());
 
     UndoRemovalAction action = new UndoRemovalAction();
@@ -107,7 +107,8 @@ void main() {
       return state;
     };
     DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
-    when(databaseReferenceMock.child(any)).thenReturn(databaseReferenceMock);
+    when(databaseReferenceMock.child(typed(any))).thenReturn(
+        databaseReferenceMock);
     when(databaseReferenceMock.push()).thenReturn(databaseReferenceMock);
     ReduxState state = new ReduxState(
       weightFromNotes: 70.0,
@@ -131,7 +132,8 @@ void main() {
       return state;
     };
     DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
-    when(databaseReferenceMock.child(any)).thenReturn(databaseReferenceMock);
+    when(databaseReferenceMock.child(typed(any))).thenReturn(
+        databaseReferenceMock);
     when(databaseReferenceMock.push()).thenReturn(databaseReferenceMock);
     ReduxState state = new ReduxState(
       weightFromNotes: 70.0,

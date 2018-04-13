@@ -3,11 +3,7 @@ package com.mszalek.weight_tracker;
 import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.gms.actions.NoteIntents;
-
-import java.nio.ByteBuffer;
-
 import io.flutter.app.FlutterActivity;
-import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -29,15 +25,16 @@ public class MainActivity extends FlutterActivity {
             }
         }
 
-        new MethodChannel(getFlutterView(), "app.channel.shared.data").setMethodCallHandler(new MethodChannel.MethodCallHandler() {
-            @Override
-            public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-                if (methodCall.method.contentEquals("getSavedNote")) {
-                    result.success(savedNote);
-                    savedNote = null;
-                }
-            }
-        });
+        new MethodChannel(getFlutterView(), "app.channel.shared.data")
+                .setMethodCallHandler(new MethodChannel.MethodCallHandler() {
+                    @Override
+                    public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
+                        if (methodCall.method.contentEquals("getSavedNote")) {
+                            result.success(savedNote);
+                            savedNote = null;
+                        }
+                    }
+                });
     }
 
 

@@ -8,7 +8,7 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 
 void main() {
-  final Store store = new Store(reduce,
+  final Store store = new Store<ReduxState>(reduce,
       initialState: new ReduxState(),
       middleware: [middleware].toList());
 

@@ -30,14 +30,14 @@ void main() {
   testWidgets('WeightEntryDialog has "Edit entry" in header',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce, initialState: defaultState), tester);
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
     expect(find.widgetWithText(AppBar, 'Edit entry'), findsOneWidget);
   });
 
   testWidgets('WeightEntryDialog has "New entry" in header',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce,
+        new Store<ReduxState>(reduce,
             initialState:
             defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
@@ -47,14 +47,14 @@ void main() {
   testWidgets('WeightEntryDialog has "SAVE" button when edit',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce, initialState: defaultState), tester);
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
     expect(find.widgetWithText(FlatButton, 'SAVE'), findsOneWidget);
   });
 
   testWidgets('WeightEntryDialog has "SAVE" button when not edit',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce,
+        new Store<ReduxState>(reduce,
             initialState:
             defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
@@ -64,14 +64,14 @@ void main() {
   testWidgets('WeightEntryDialog has "DELETE" button when edit',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce, initialState: defaultState), tester);
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
     expect(find.widgetWithText(FlatButton, 'DELETE'), findsOneWidget);
   });
 
   testWidgets('WeightEntryDialog has not "DELETE" button when not edit',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce,
+        new Store<ReduxState>(reduce,
             initialState:
             defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
@@ -81,14 +81,15 @@ void main() {
   testWidgets('WeightEntryDialog displays weight in kg',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce, initialState: defaultState), tester);
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
     expect(find.text('70.0 kg'), findsOneWidget);
   });
 
   testWidgets('WeightEntryDialog displays weight in lbs',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce, initialState: defaultState.copyWith(unit: 'lbs')),
+        new Store<ReduxState>(
+            reduce, initialState: defaultState.copyWith(unit: 'lbs')),
         tester);
     expect(find.text('154.0 lbs'), findsOneWidget);
   });
@@ -96,7 +97,7 @@ void main() {
   testWidgets('WeightEntryDialog displays hint when note is null',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store(reduce, initialState: defaultState), tester);
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
     expect(find.text('Optional note'), findsOneWidget);
   });
 
@@ -104,7 +105,7 @@ void main() {
   testWidgets('WeightEntryDialog opens MonthPicker on date click',
           (WidgetTester tester) async {
         await pumpSettingWidget(
-            new Store(reduce, initialState: defaultState), tester);
+            new Store<ReduxState>(reduce, initialState: defaultState), tester);
         await tester.tap(find.byKey(new Key('CalendarItem')));
         await tester.pump();
         expect(find.byType(MonthPicker), findsOneWidget);
@@ -114,7 +115,7 @@ void main() {
   testWidgets('WeightEntryDialog opens Dialog on time click',
           (WidgetTester tester) async {
         await pumpSettingWidget(
-            new Store(reduce, initialState: defaultState), tester);
+            new Store<ReduxState>(reduce, initialState: defaultState), tester);
         await tester.tap(find.byKey(new Key('TimeItem')));
         await tester.pump();
         expect(find.byType(Dialog), findsOneWidget);
@@ -123,7 +124,7 @@ void main() {
   testWidgets('WeightEntryDialog opens NumberPickerDialog on weight click',
           (WidgetTester tester) async {
         await pumpSettingWidget(
-            new Store(reduce, initialState: defaultState), tester);
+            new Store<ReduxState>(reduce, initialState: defaultState), tester);
         await tester.tap(find.text('70.0 kg'));
         await tester.pump();
         expect(find.byType(NumberPickerDialog), findsOneWidget);

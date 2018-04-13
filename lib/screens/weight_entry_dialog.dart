@@ -51,8 +51,8 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, DialogViewModel>(
       converter: (store) {
-        WeightEntry activeEntry = store.state.weightEntryDialogState
-            .activeEntry;
+        WeightEntry activeEntry =
+            store.state.weightEntryDialogState.activeEntry;
         return new DialogViewModel(
             weightEntry: activeEntry,
             unit: store.state.unit,
@@ -164,15 +164,16 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
   }
 
   _showWeightPicker(BuildContext context, DialogViewModel viewModel) {
-    showDialog(
+    showDialog<double>(
       context: context,
-      child: new NumberPickerDialog.decimal(
-        minValue: viewModel
-            .unit == "kg" ? MIN_KG_VALUE : (MIN_KG_VALUE * KG_LBS_RATIO)
-            .toInt(),
-        maxValue: viewModel
-            .unit == "kg" ? MAX_KG_VALUE : (MAX_KG_VALUE * KG_LBS_RATIO)
-            .toInt(),
+      builder: (context) =>
+      new NumberPickerDialog.decimal(
+        minValue: viewModel.unit == "kg"
+            ? MIN_KG_VALUE
+            : (MIN_KG_VALUE * KG_LBS_RATIO).toInt(),
+        maxValue: viewModel.unit == "kg"
+            ? MAX_KG_VALUE
+            : (MAX_KG_VALUE * KG_LBS_RATIO).toInt(),
         initialDoubleValue: viewModel.weightToDisplay,
         title: new Text("Enter your weight"),
       ),

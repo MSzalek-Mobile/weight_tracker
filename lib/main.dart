@@ -12,7 +12,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final Store store = new Store(reduce,
+  final Store<ReduxState> store = new Store<ReduxState>(reduce,
       initialState: new ReduxState(
           entries: [],
           unit: 'kg',
