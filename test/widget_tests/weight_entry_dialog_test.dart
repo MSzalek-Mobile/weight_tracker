@@ -17,10 +17,10 @@ void main() {
   dialogState.copyWith(isEditMode: false);
   ReduxState defaultState = new ReduxState(weightEntryDialogState: dialogState);
 
-  pumpSettingWidget(Store store, WidgetTester tester) async {
+  pumpSettingWidget(Store<ReduxState> store, WidgetTester tester) async {
     await tester.pumpWidget(new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-      return new StoreProvider(
+          return new StoreProvider<ReduxState>(
         store: store,
         child: new MaterialApp(home: new WeightEntryDialog()),
       );

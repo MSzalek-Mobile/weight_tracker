@@ -8,14 +8,14 @@ import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 
 void main() {
-  final Store store = new Store<ReduxState>(reduce,
+  final Store<ReduxState> store = new Store<ReduxState>(reduce,
       initialState: new ReduxState(),
       middleware: [middleware].toList());
 
   pumpSettingWidget(WidgetTester tester) async {
     await tester.pumpWidget(new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-      return new StoreProvider(
+          return new StoreProvider<ReduxState>(
         store: store,
         child: new MaterialApp(home: new SettingsPage()),
       );

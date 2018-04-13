@@ -16,9 +16,9 @@ void main() {
     //when
     chartPainter.paint(mockCanvas, size);
     //then
-    verifyNever(mockCanvas.drawCircle(any, any, any));
-    verifyNever(mockCanvas.drawLine(any, any, any));
-    verify(mockCanvas.drawParagraph(any, any)).called(1);
+    verifyNever(mockCanvas.drawCircle(typed(any), typed(any), typed(any)));
+    verifyNever(mockCanvas.drawLine(typed(any), typed(any), typed(any)));
+    verify(mockCanvas.drawParagraph(typed(any), typed(any))).called(1);
   });
 
   ///There are 5 horizontal lines
@@ -31,8 +31,8 @@ void main() {
     //when
     chartPainter.paint(mockCanvas, size);
     //then
-    verify(mockCanvas.drawCircle(any, any, any)).called(1);
-    verify(mockCanvas.drawLine(any, any, any)).called(5);
+    verify(mockCanvas.drawCircle(typed(any), typed(any), typed(any))).called(1);
+    verify(mockCanvas.drawLine(typed(any), typed(any), typed(any))).called(5);
   });
 
   test("Given two values, ChartPainter draws 6 lines and 2 points", () {
@@ -48,7 +48,7 @@ void main() {
     //when
     chartPainter.paint(mockCanvas, size);
     //then
-    verify(mockCanvas.drawCircle(any, any, any)).called(2);
-    verify(mockCanvas.drawLine(any, any, any)).called(6);
+    verify(mockCanvas.drawCircle(typed(any), typed(any), typed(any))).called(2);
+    verify(mockCanvas.drawLine(typed(any), typed(any), typed(any))).called(6);
   });
 }

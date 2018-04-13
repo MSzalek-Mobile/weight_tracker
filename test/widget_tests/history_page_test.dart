@@ -12,10 +12,10 @@ void main() {
   WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
   ReduxState defaultState = new ReduxState(unit: 'kg', entries: [entry, entry]);
 
-  pumpSettingWidget(Store store, WidgetTester tester) async {
+  pumpSettingWidget(Store<ReduxState> store, WidgetTester tester) async {
     await tester.pumpWidget(new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-      return new StoreProvider(
+          return new StoreProvider<ReduxState>(
         store: store,
         child: new MaterialApp(home: new Scaffold(body: new HistoryPage())),
       );
