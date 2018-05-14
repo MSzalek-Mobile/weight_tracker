@@ -31,7 +31,23 @@ class ProgressChartViewModel {
   });
 }
 
-class ProgressChart extends StatelessWidget {
+List<RangeOption> rangeOptions = [
+  RangeOption(31, "month"),
+  RangeOption(91, "3 months"),
+  RangeOption(182, "6 months"),
+  RangeOption(365, "year"),
+];
+
+class ProgressChart extends StatefulWidget {
+  @override
+  ProgressChartState createState() {
+    return new ProgressChartState();
+  }
+}
+
+class ProgressChartState extends State<ProgressChart> {
+  RangeOption rangeOption = rangeOptions[0];
+
   @override
   Widget build(BuildContext context) {
     return new StoreConnector<ReduxState, ProgressChartViewModel>(
@@ -50,28 +66,72 @@ class ProgressChart extends StatelessWidget {
         );
       },
       builder: (BuildContext context, ProgressChartViewModel viewModel) {
-        return new GestureDetector(
-          onScaleStart: (details) => viewModel.snapShotDaysToShow(),
-          onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
-            int newNumberOfDays =
-            (viewModel.previousDaysToShow / scaleDetails.scale).round();
-            if (newNumberOfDays >= 8) {
-              viewModel.changeDaysToShow(newNumberOfDays);
-            }
-          },
-          onScaleEnd: (details) => viewModel.endGesture(),
-          child: new CustomPaint(
-            painter: new ChartPainter(
-              utils.prepareEntryList(viewModel.entriesToShow,
-                  new DateTime.now(), viewModel.daysToShow),
-              viewModel.daysToShow,
-              viewModel.unit == "lbs",
+        return new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            new Expanded(
+              child: new GestureDetector(
+                onScaleStart: (details) => viewModel.snapShotDaysToShow(),
+                onScaleUpdate: (ScaleUpdateDetails scaleDetails) {
+                  int newNumberOfDays =
+                  (viewModel.previousDaysToShow / scaleDetails.scale)
+                      .round();
+                  if (newNumberOfDays >= 8) {
+                    viewModel.changeDaysToShow(newNumberOfDays);
+                  }
+                },
+                onScaleEnd: (details) => viewModel.endGesture(),
+                child: new CustomPaint(
+                  painter: new ChartPainter(
+                    utils.prepareEntryList(viewModel.entriesToShow,
+                        new DateTime.now(), viewModel.daysToShow),
+                    viewModel.daysToShow,
+                    viewModel.unit == "lbs",
+                  ),
+                ),
+              ),
             ),
-          ),
+            new Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Padding(
+                  padding: const EdgeInsets.only(right: 8.0, bottom: 15.0),
+                  child: new Text(
+                    "Show entries from last",
+                    style: new TextStyle(color: Colors.grey[500]),
+                  ),
+                ),
+                new DropdownButton<RangeOption>(
+                  value: rangeOption,
+                  items: rangeOptions
+                      .map((option) =>
+                  new DropdownMenuItem<RangeOption>(
+                    child: new Text(option.text),
+                    value: option,
+                  ))
+                      .toList(),
+                  onChanged: (option) {
+                    viewModel.changeDaysToShow(option.days);
+                    viewModel.endGesture();
+                    setState(() => rangeOption = option);
+                  },
+                ),
+              ],
+            ),
+          ],
         );
       },
     );
   }
+}
+
+class RangeOption {
+  final int days;
+  final String text;
+
+  RangeOption(this.days, this.text);
 }
 
 class ChartPainter extends CustomPainter {
