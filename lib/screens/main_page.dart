@@ -3,6 +3,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/history_page.dart';
+import 'package:weight_tracker/screens/profile_screen.dart';
 import 'package:weight_tracker/screens/settings_screen.dart';
 import 'package:weight_tracker/screens/statistics_page.dart';
 import 'package:weight_tracker/screens/weight_entry_dialog.dart';
@@ -109,11 +110,7 @@ class MainPageState extends State<MainPage>
                     ],
                     controller: _tabController,
                   ),
-                  actions: [
-                    new IconButton(
-                        icon: new Icon(Icons.settings),
-                        onPressed: () => _openSettingsPage(context))
-                  ],
+                  actions: _buildMenuActions(context),
                 ),
               ];
             },
@@ -133,6 +130,31 @@ class MainPageState extends State<MainPage>
         );
       },
     );
+  }
+
+  List<Widget> _buildMenuActions(BuildContext context) {
+    return [
+      new IconButton(
+          icon: new Icon(Icons.settings),
+          onPressed: () => _openSettingsPage(context)),
+      new PopupMenuButton<String>(
+        onSelected: (val) {
+          if (val == "Profile") {
+            Navigator.of(context).push(new MaterialPageRoute(
+              builder: (context) => new ProfileScreen(),
+            ));
+          }
+        },
+        itemBuilder: (context) {
+          return [
+            new PopupMenuItem<String>(
+              value: "Profile",
+              child: new Text("Profile"),
+            ),
+          ];
+        },
+      )
+    ];
   }
 
   _scrollToTop() {
