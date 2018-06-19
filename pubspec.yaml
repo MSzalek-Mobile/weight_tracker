@@ -24,6 +24,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/scale-bathroom.png
+    - assets/user_icon.png
 
   # To add assets from package dependencies, first ensure the asset
   # is in the lib/ directory of the dependency. Then,

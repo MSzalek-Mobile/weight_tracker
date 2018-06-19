@@ -34,10 +34,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _getUserIcon(_ViewModel vm) {
     if (vm.user.isAnonymous) {
       return new CircleAvatar(
-        child: new Icon(
-          Icons.person,
-          size: 72.0,
-        ),
+        backgroundImage: new AssetImage("assets/user_icon.png"),
         radius: 36.0,
       );
     } else {
