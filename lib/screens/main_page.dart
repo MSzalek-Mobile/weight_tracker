@@ -133,11 +133,14 @@ class MainPageState extends State<MainPage>
   }
 
   List<Widget> _buildMenuActions(BuildContext context) {
-    return [
+    List<Widget> actions = [
       new IconButton(
           icon: new Icon(Icons.settings),
           onPressed: () => _openSettingsPage(context)),
-      new PopupMenuButton<String>(
+    ];
+    bool showProfile = false;
+    if (showProfile) {
+      actions.add(new PopupMenuButton<String>(
         onSelected: (val) {
           if (val == "Profile") {
             Navigator.of(context).push(new MaterialPageRoute(
@@ -153,8 +156,9 @@ class MainPageState extends State<MainPage>
             ),
           ];
         },
-      )
-    ];
+      ));
+    }
+    return actions;
   }
 
   _scrollToTop() {
