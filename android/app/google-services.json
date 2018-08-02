@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "123595545975",
+    "firebase_url": "https://weight-tracker-e574f.firebaseio.com",
+    "project_id": "weight-tracker-e574f",
+    "storage_bucket": "weight-tracker-e574f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123595545975:android:94795a974b1f6481",
+        "android_client_info": {
+          "package_name": "com.mszalek.weight_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123595545975-cv0hdhccs4o3itmi7k70o4d8i61injvi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mszalek.weight_tracker",
+            "certificate_hash": "4cfcaae693f041e62c51224b17ff5920ca45db7c"
+          }
+        },
+        {
+          "client_id": "123595545975-jvcpng9krrieeokh79673e448cekctnj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALrYc3bKgEoGPX2Ez3jjgejLRqaNXSysY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123595545975-jvcpng9krrieeokh79673e448cekctnj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
