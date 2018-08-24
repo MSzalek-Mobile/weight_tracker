@@ -5,15 +5,15 @@ dependencies:
   flutter:
     sdk: flutter
   numberpicker: "^0.1.0"
-  firebase_auth: "^0.5.10"
-  firebase_database: "^0.4.6"
-  firebase_analytics: "^1.0.1"
+  firebase_auth: "^0.5.19"
+  firebase_database: "^1.0.4"
+  firebase_analytics: "^1.0.3"
   redux: "^3.0.0"
-  flutter_redux: "^0.5.0"
+  flutter_redux: "^0.5.2"
   tuple: "^1.0.1"
   intl: "^0.15.6"
-  shared_preferences: "^0.4.1"
-  mockito: "3.0.0-beta+3"
+  shared_preferences: "^0.4.2"
+  mockito: "3.0.0"
 
 dev_dependencies:
   flutter_test:
