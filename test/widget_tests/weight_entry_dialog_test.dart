@@ -8,6 +8,7 @@ import 'package:weight_tracker/logic/reducer.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/screens/weight_entry_dialog.dart';
+import 'package:matcher/matcher.dart' as matchers;
 
 void main() {
   WeightEntry activeEntry = new WeightEntry(new DateTime.now(), 70.0, null);
@@ -136,7 +137,7 @@ void main() {
           (WidgetTester tester) async {
         WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
         var reducer = (state, action) {
-          expect(action, new isInstanceOf<EditEntryAction>());
+          expect(action, matchers.TypeMatcher<EditEntryAction>());
           expect((action as EditEntryAction).weightEntry, entry);
         };
         await pumpSettingWidget(
@@ -155,7 +156,7 @@ void main() {
           (WidgetTester tester) async {
         WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
         var reducer = (state, action) {
-          expect(action, new isInstanceOf<AddEntryAction>());
+          expect(action, matchers.TypeMatcher<AddEntryAction>());
           expect((action as AddEntryAction).weightEntry, entry);
         };
         await pumpSettingWidget(
@@ -174,7 +175,7 @@ void main() {
           (WidgetTester tester) async {
         WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
         var reducer = (state, action) {
-          expect(action, new isInstanceOf<RemoveEntryAction>());
+          expect(action, matchers.TypeMatcher<RemoveEntryAction>());
           expect((action as RemoveEntryAction).weightEntry, entry);
         };
         await pumpSettingWidget(
