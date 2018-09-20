@@ -6,12 +6,15 @@ import 'package:weight_tracker/logic/middleware.dart';
 import 'package:weight_tracker/logic/reducer.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/screens/main_page.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 
 void main() {
   runApp(new MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  final FirebaseAnalytics analytics = new FirebaseAnalytics();
   final Store<ReduxState> store = new Store<ReduxState>(reduce,
       initialState: new ReduxState(
           entries: [],
@@ -32,7 +35,10 @@ class MyApp extends StatelessWidget {
         theme: new ThemeData(
           primarySwatch: Colors.green,
         ),
-        home: new MainPage(title: "Weight Tracker"),
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(analytics: analytics),
+        ],
+        home: new MainPage(title: "Weight Tracker", analytics: analytics),
       ),
     );
   }
