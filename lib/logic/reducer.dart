@@ -11,7 +11,7 @@ ReduxState reduce(ReduxState state, action) {
   _reduceWeightEntryDialogState(state, action);
   FirebaseState firebaseState = _reduceFirebaseState(state, action);
   MainPageReduxState mainPageState = _reduceMainPageState(state, action);
-  ProgressChartState progressChartState = _reduceChartState(state, action);
+  DateTime progressChartStartDate = _reduceProgressChartStartDate(state, action);
   double weightFromNotes = _reduceWeightFromNotes(state, action);
 
   return new ReduxState(
@@ -21,7 +21,7 @@ ReduxState reduce(ReduxState state, action) {
     weightEntryDialogState: weightEntryDialogState,
     firebaseState: firebaseState,
     mainPageState: mainPageState,
-    progressChartState: progressChartState,
+    progressChartStartDate: progressChartStartDate,
     weightFromNotes: weightFromNotes,
   );
 }
@@ -121,21 +121,10 @@ List<WeightEntry> _reduceEntries(ReduxState state, action) {
   return entries;
 }
 
-/// I don't check if values have sense (e.g. if they are greater than 0) - let it be ;)
-ProgressChartState _reduceChartState(ReduxState state, action) {
-  ProgressChartState newState = state.progressChartState;
-  if (action is ChangeDaysToShowOnChart) {
-    if (newState.lastFinishedDateTime == null ||
-        newState.lastFinishedDateTime.isBefore(
-            new DateTime.now().subtract(const Duration(milliseconds: 10)))) {
-      newState = newState.copyWith(daysToShow: action.daysToShow);
-    }
-  } else if (action is SnapShotDaysToShow) {
-    newState = newState.copyWith(previousDaysToShow: newState.daysToShow);
-  } else if (action is EndGestureOnProgressChart) {
-    newState = newState.copyWith(
-        previousDaysToShow: newState.daysToShow,
-        lastFinishedDateTime: new DateTime.now());
+DateTime _reduceProgressChartStartDate(ReduxState state, action) {
+  DateTime date = state.progressChartStartDate;
+  if (action is ChangeProgressChartStartDate) {
+    date = action.dateTime;
   }
-  return newState;
+  return date;
 }

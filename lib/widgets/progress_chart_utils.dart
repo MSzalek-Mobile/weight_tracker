@@ -1,12 +1,14 @@
 import 'package:weight_tracker/model/weight_entry.dart';
 
-/// Removes entries that are before today-[daysToShow]
+/// Removes entries that are before beginningDate
 /// Adds an entry at the beginning of list if there is one before and after beginningDate
 List<WeightEntry> prepareEntryList(
-    List<WeightEntry> initialEntries, DateTime now, int daysToShow) {
-  DateTime beginningDate = getStartDateOfChart(now, daysToShow);
+    List<WeightEntry> initialEntries, DateTime beginningDate) {
   List<WeightEntry> entries = initialEntries
-      .where((entry) => entry.dateTime.isAfter(beginningDate))
+      .where((entry) =>
+          entry.dateTime.isAfter(beginningDate) ||
+          copyDateWithoutTime(entry.dateTime)
+              .isAtSameMomentAs(copyDateWithoutTime(beginningDate)))
       .toList();
   if (entries.isNotEmpty &&
       _isMissingEntryFromBeginningDate(beginningDate, entries) &&
@@ -22,7 +24,7 @@ DateTime getStartDateOfChart(DateTime now, int daysToShow) {
   return beginningOfChart;
 }
 
-DateTime _copyDateWithoutTime(DateTime dateTime) {
+DateTime copyDateWithoutTime(DateTime dateTime) {
   return new DateTime.utc(dateTime.year, dateTime.month, dateTime.day);
 }
 
@@ -61,9 +63,9 @@ bool _isAnyEntryBeforeBeginningDate(
 double _calculateWeightOnBeginningDate(WeightEntry lastEntryBeforeBeginning,
     WeightEntry firstEntryAfterBeginning, DateTime beginningDate) {
   DateTime firstEntryDateTime =
-      _copyDateWithoutTime(firstEntryAfterBeginning.dateTime);
+      copyDateWithoutTime(firstEntryAfterBeginning.dateTime);
   DateTime lastEntryDateTime =
-      _copyDateWithoutTime(lastEntryBeforeBeginning.dateTime);
+      copyDateWithoutTime(lastEntryBeforeBeginning.dateTime);
 
   int differenceInDays =
       firstEntryDateTime.difference(lastEntryDateTime).inDays;

@@ -11,7 +11,7 @@ class ReduxState {
   final WeightEntryDialogReduxState weightEntryDialogState;
   final FirebaseState firebaseState;
   final MainPageReduxState mainPageState;
-  final ProgressChartState progressChartState;
+  final DateTime progressChartStartDate;
   final double weightFromNotes;
 
   const ReduxState({
@@ -21,7 +21,7 @@ class ReduxState {
     this.unit = 'kg',
     this.removedEntryState = const RemovedEntryState(),
     this.weightEntryDialogState = const WeightEntryDialogReduxState(),
-    this.progressChartState = const ProgressChartState(),
+    this.progressChartStartDate,
     this.weightFromNotes,
   });
 
@@ -32,7 +32,7 @@ class ReduxState {
     String unit,
     RemovedEntryState removedEntryState,
     WeightEntryDialogReduxState weightEntryDialogState,
-    ProgressChartState progressChartState,
+    DateTime progressChartStartDate,
   }) {
     return new ReduxState(
         firebaseState: firebaseState ?? this.firebaseState,
@@ -42,26 +42,7 @@ class ReduxState {
         weightEntryDialogState:
         weightEntryDialogState ?? this.weightEntryDialogState,
         removedEntryState: removedEntryState ?? this.removedEntryState,
-        progressChartState: progressChartState ?? this.progressChartState);
-  }
-}
-
-@immutable
-class ProgressChartState {
-  final int daysToShow;
-  final int previousDaysToShow;
-  final DateTime lastFinishedDateTime;
-
-  const ProgressChartState(
-      {this.daysToShow = 31, this.previousDaysToShow = 31, this.lastFinishedDateTime});
-
-  ProgressChartState copyWith(
-      {int daysToShow, int previousDaysToShow, DateTime lastFinishedDateTime}) {
-    return new ProgressChartState(
-      daysToShow: daysToShow ?? this.daysToShow,
-      previousDaysToShow: previousDaysToShow ?? this.previousDaysToShow,
-      lastFinishedDateTime: lastFinishedDateTime ?? this.lastFinishedDateTime,
-    );
+        progressChartStartDate: progressChartStartDate ?? this.progressChartStartDate);
   }
 }
 

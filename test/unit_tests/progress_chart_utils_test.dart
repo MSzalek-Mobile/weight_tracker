@@ -17,7 +17,7 @@ void main() {
     List<WeightEntry> entries = [entry1, entry2, entry3, entry4];
     //when
     List<WeightEntry> newEntries =
-        utils.prepareEntryList(entries, now, daysToShow);
+        utils.prepareEntryList(entries, now.subtract(Duration(days: daysToShow-1)));
     //then
     expect(newEntries, contains(entry1));
     expect(newEntries, contains(entry2));
@@ -35,7 +35,7 @@ void main() {
     List<WeightEntry> entries = [firstEntryAfterBorder, lastEntryBeforeBorder];
     //when
     List<WeightEntry> newEntries =
-        utils.prepareEntryList(entries, now, daysToShow);
+        utils.prepareEntryList(entries, now.subtract(Duration(days: daysToShow-1)));
     //then
     expect(newEntries, contains(firstEntryAfterBorder));
     expect(newEntries, isNot(contains(lastEntryBeforeBorder)));
