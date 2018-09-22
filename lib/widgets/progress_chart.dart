@@ -9,6 +9,7 @@ import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/constants.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
+import 'package:weight_tracker/widgets/progress_chart_dropdown.dart';
 import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 import 'package:weight_tracker/widgets/progress_chart_utils.dart';
 
@@ -22,13 +23,6 @@ class ProgressChartViewModel {
   });
 }
 
-List<RangeOption> rangeOptions = [
-  RangeOption(31, "month"),
-  RangeOption(91, "3 months"),
-  RangeOption(182, "6 months"),
-  RangeOption(365, "year"),
-];
-
 class ProgressChart extends StatefulWidget {
   @override
   ProgressChartState createState() {
@@ -37,32 +31,8 @@ class ProgressChart extends StatefulWidget {
 }
 
 class ProgressChartState extends State<ProgressChart> {
-  RangeOption rangeOption = rangeOptions[0];
   DateTime startDate;
   DateTime snapShotStartDate;
-
-  void _onScaleStart(ScaleStartDetails details) {
-    setState(() {
-      this.snapShotStartDate = this.startDate;
-    });
-  }
-
-  void _onScaleUpdate(ScaleUpdateDetails details) {
-    int previousNumberOfDays = daysToDraw(snapShotStartDate);
-    int newNumberOfDays = (previousNumberOfDays / details.scale).round();
-    if (newNumberOfDays >= 8) {
-      setState(() {
-        startDate =
-            new DateTime.now().subtract(Duration(days: newNumberOfDays));
-      });
-    }
-  }
-
-  int daysToDraw(DateTime date) {
-    DateTime now = copyDateWithoutTime(new DateTime.now());
-    DateTime start = copyDateWithoutTime(date);
-    return now.difference(start).inDays+1;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,63 +50,61 @@ class ProgressChartState extends State<ProgressChart> {
       onDispose: (store) {
         store.dispatch(ChangeProgressChartStartDate(this.startDate));
       },
-      builder: (BuildContext context, ProgressChartViewModel viewModel) {
-        return new Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            new Expanded(
-              child: new GestureDetector(
-                onScaleStart: _onScaleStart,
-                onScaleUpdate: _onScaleUpdate,
-                child: new CustomPaint(
-                  painter: new ChartPainter(
-                    utils.prepareEntryList(viewModel.allEntries, startDate),
-                    daysToDraw(startDate),
-                    viewModel.unit == "lbs",
-                  ),
-                ),
-              ),
-            ),
-//            new Row(
-//              crossAxisAlignment: CrossAxisAlignment.end,
-//              mainAxisAlignment: MainAxisAlignment.center,
-//              children: <Widget>[
-//                new Padding(
-//                  padding: const EdgeInsets.only(right: 8.0, bottom: 15.0),
-//                  child: new Text(
-//                    "Show entries from last",
-//                    style: new TextStyle(color: Colors.grey[500]),
-//                  ),
-//                ),
-//                new DropdownButton<RangeOption>(
-//                  value: rangeOption,
-//                  items: rangeOptions
-//                      .map((option) => new DropdownMenuItem<RangeOption>(
-//                            child: new Text(option.text),
-//                            value: option,
-//                          ))
-//                      .toList(),
-//                  onChanged: (option) {
-//                    viewModel.changeDaysToShow(option.days);
-//                    viewModel.endGesture();
-//                    setState(() => rangeOption = option);
-//                  },
-//                ),
-//              ],
-//            ),
-          ],
-        );
-      },
+      builder: _buildChartWithDropdown,
     );
   }
-}
 
-class RangeOption {
-  final int days;
-  final String text;
+  Widget _buildChart(ProgressChartViewModel viewModel) {
+    return GestureDetector(
+      onScaleStart: _onScaleStart,
+      onScaleUpdate: _onScaleUpdate,
+      child: CustomPaint(
+        painter: ChartPainter(
+          utils.prepareEntryList(viewModel.allEntries, startDate),
+          daysToDraw(startDate),
+          viewModel.unit == "lbs",
+        ),
+      ),
+    );
+  }
 
-  RangeOption(this.days, this.text);
+  Widget _buildChartWithDropdown(
+      BuildContext context, ProgressChartViewModel viewModel) {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        new Expanded(child: _buildChart(viewModel)),
+        ProgressChartDropdown(
+          daysToShow: daysToDraw(startDate),
+          onStartSelected: (date) => setState(() => startDate = date),
+        ),
+      ],
+    );
+  }
+
+  void _onScaleStart(ScaleStartDetails details) {
+    setState(() {
+      this.snapShotStartDate = this.startDate;
+    });
+  }
+
+  void _onScaleUpdate(ScaleUpdateDetails details) {
+    int previousNumberOfDays = daysToDraw(snapShotStartDate);
+    int newNumberOfDays = (previousNumberOfDays / details.scale).round();
+    if (newNumberOfDays >= 7) {
+      setState(() {
+        startDate =
+            new DateTime.now().subtract(Duration(days: newNumberOfDays - 1));
+      });
+    }
+  }
+
+  int daysToDraw(DateTime date) {
+    DateTime now = copyDateWithoutTime(new DateTime.now());
+    DateTime start = copyDateWithoutTime(date);
+    return now.difference(start).inDays + 1;
+  }
 }
 
 class ChartPainter extends CustomPainter {
