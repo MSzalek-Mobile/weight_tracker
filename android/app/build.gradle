@@ -36,8 +36,8 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 6
-        versionName "1.5"
+        versionCode 7
+        versionName "1.5.1"
 
         applicationId "com.mszalek.weight_tracker"
     }
