@@ -3,6 +3,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:meta/meta.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
+import 'package:weight_tracker/screens/profile_view.dart';
 
 @immutable
 class SettingsPageViewModel {
@@ -26,30 +27,39 @@ class SettingsPage extends StatelessWidget {
         appBar: new AppBar(
           title: new Text("Settings"),
         ),
-        body: new Padding(
-          padding: new EdgeInsets.all(16.0),
-          child: new Row(
-            children: <Widget>[
-              new Expanded(
-                  child: new Text(
-                "Unit",
-                style: Theme.of(context).textTheme.headline,
-              )),
-              new DropdownButton<String>(
-                key: const Key('UnitDropdown'),
-                value: viewModel.unit,
-                items: <String>["kg", "lbs"].map((String value) {
-                  return new DropdownMenuItem<String>(
-                    value: value,
-                    child: new Text(value),
-                  );
-                }).toList(),
-                onChanged: (newUnit) => viewModel.onUnitChanged(newUnit),
-              ),
-            ],
-          ),
+        body: Column(
+          children: <Widget>[
+            new Padding(
+              padding: new EdgeInsets.all(16.0),
+              child: _unitView(context, viewModel),
+            ),
+            ProfileView(),
+          ],
         ),
       );
     });
+  }
+
+  Row _unitView(BuildContext context, SettingsPageViewModel viewModel) {
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+            child: new Text(
+          "Unit",
+          style: Theme.of(context).textTheme.headline,
+        )),
+        new DropdownButton<String>(
+          key: const Key('UnitDropdown'),
+          value: viewModel.unit,
+          items: <String>["kg", "lbs"].map((String value) {
+            return new DropdownMenuItem<String>(
+              value: value,
+              child: new Text(value),
+            );
+          }).toList(),
+          onChanged: (newUnit) => viewModel.onUnitChanged(newUnit),
+        ),
+      ],
+    );
   }
 }

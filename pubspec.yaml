@@ -14,6 +14,7 @@ dependencies:
   intl: "^0.15.7"
   shared_preferences: "^0.4.2"
   mockito: "^3.0.0"
+  google_sign_in: "^3.2.2"
 
 dev_dependencies:
   flutter_test:
@@ -24,4 +25,6 @@ flutter:
 
   uses-material-design: true
   assets:
-    - assets/scale-bathroom.png
+  - assets/scale-bathroom.png
+  - assets/user.png
+  - assets/google.png

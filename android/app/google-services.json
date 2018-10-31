@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "123595545975-qlq2eju9tpm89igcgj13f96dne92dd12.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mszalek.weight_tracker",
+            "certificate_hash": "52f32b889e107f33b006c376421992370f90510c"
+          }
+        },
+        {
           "client_id": "123595545975-jvcpng9krrieeokh79673e448cekctnj.apps.googleusercontent.com",
           "client_type": 3
         }

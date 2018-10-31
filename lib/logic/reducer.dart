@@ -8,10 +8,11 @@ ReduxState reduce(ReduxState state, action) {
   String unit = _reduceUnit(state, action);
   RemovedEntryState removedEntryState = _reduceRemovedEntryState(state, action);
   WeightEntryDialogReduxState weightEntryDialogState =
-  _reduceWeightEntryDialogState(state, action);
+      _reduceWeightEntryDialogState(state, action);
   FirebaseState firebaseState = _reduceFirebaseState(state, action);
   MainPageReduxState mainPageState = _reduceMainPageState(state, action);
-  DateTime progressChartStartDate = _reduceProgressChartStartDate(state, action);
+  DateTime progressChartStartDate =
+      _reduceProgressChartStartDate(state, action);
   double weightFromNotes = _reduceWeightFromNotes(state, action);
 
   return new ReduxState(
@@ -78,8 +79,8 @@ RemovedEntryState _reduceRemovedEntryState(ReduxState reduxState, action) {
   return newState;
 }
 
-WeightEntryDialogReduxState _reduceWeightEntryDialogState(ReduxState reduxState,
-    action) {
+WeightEntryDialogReduxState _reduceWeightEntryDialogState(
+    ReduxState reduxState, action) {
   WeightEntryDialogReduxState newState = reduxState.weightEntryDialogState;
   if (action is UpdateActiveWeightEntry) {
     newState = newState.copyWith(
@@ -107,7 +108,7 @@ List<WeightEntry> _reduceEntries(ReduxState state, action) {
   } else if (action is OnChangedAction) {
     WeightEntry newValue = new WeightEntry.fromSnapshot(action.event.snapshot);
     WeightEntry oldValue =
-    entries.singleWhere((entry) => entry.key == newValue.key);
+        entries.singleWhere((entry) => entry.key == newValue.key);
     entries
       ..[entries.indexOf(oldValue)] = newValue
       ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
@@ -117,6 +118,8 @@ List<WeightEntry> _reduceEntries(ReduxState state, action) {
     entries
       ..remove(removedEntry)
       ..sort((we1, we2) => we2.dateTime.compareTo(we1.dateTime));
+  } else if (action is UserLoadedAction) {
+    entries = [];
   }
   return entries;
 }
