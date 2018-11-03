@@ -17,7 +17,7 @@ class ProfileView extends StatelessWidget {
         );
       },
       builder: (BuildContext context, _ViewModel vm) {
-        return vm.user.isAnonymous
+        return (vm.user?.isAnonymous ?? true)
             ? _anonymousView(context, vm)
             : _loggedInView(context, vm);
       },
@@ -53,9 +53,12 @@ class ProfileView extends StatelessWidget {
       children: <Widget>[
         _drawAvatar(AssetImage('assets/user.png')),
         _drawLabel(context, 'Anonymous user'),
-        Text(
-          'To synchronize your data across all devices link your data with a Google account.',
-          textAlign: TextAlign.center,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'To synchronize your data across all devices link your data with a Google account.',
+            textAlign: TextAlign.center,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
