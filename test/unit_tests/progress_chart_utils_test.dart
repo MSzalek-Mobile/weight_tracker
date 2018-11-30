@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 

@@ -1,7 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:mockito/mockito.dart';
 import 'package:redux/redux.dart';
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/middleware.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
