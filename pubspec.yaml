@@ -5,16 +5,16 @@ dependencies:
   flutter:
     sdk: flutter
   numberpicker: ^0.1.6
-  firebase_auth: ^0.5.19
-  firebase_database: ^1.0.4
-  firebase_analytics: ^1.0.3
+  firebase_auth: ^0.6.6
+  firebase_database: ^1.0.5
+  firebase_analytics: ^1.0.6
   redux: ^3.0.0
   flutter_redux: ^0.5.2
   tuple: ^1.0.2
   intl: ^0.15.7
-  shared_preferences: ^0.4.2
+  shared_preferences: ^0.4.3
   mockito: ^4.0.0
-  google_sign_in: ^3.2.2
+  google_sign_in: ^3.2.4
 
 dev_dependencies:
   flutter_test:

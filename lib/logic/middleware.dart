@@ -68,13 +68,15 @@ _handleLoginWithGoogle(Store<ReduxState> store, LoginWithGoogle action) async {
     );
     hasLinkingFailed = true;
   }
-  await FirebaseAuth.instance.updateProfile(new UserUpdateInfo()
+
+  FirebaseUser user = await FirebaseAuth.instance.currentUser();
+  await user.updateProfile(new UserUpdateInfo()
     ..photoUrl = googleUser.photoUrl
     ..displayName = googleUser.displayName);
-  FirebaseUser newUser = await FirebaseAuth.instance.currentUser();
+  user.reload();
 
   store.dispatch(new UserLoadedAction(
-    newUser,
+    user,
     cachedEntries: hasLinkingFailed ? action.cachedEntries : [],
   ));
 }
