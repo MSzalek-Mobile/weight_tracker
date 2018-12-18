@@ -11,3 +11,6 @@ GeneratedPluginRegistrant.java
 /gradlew
 /gradlew.bat
 /gradle/wrapper/gradle-wrapper.jar
+
+key.jks
+key.properties
