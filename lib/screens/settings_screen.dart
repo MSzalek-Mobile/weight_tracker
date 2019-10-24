@@ -3,7 +3,6 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:meta/meta.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
-import 'package:weight_tracker/screens/profile_view.dart';
 
 @immutable
 class SettingsPageViewModel {
@@ -33,7 +32,7 @@ class SettingsPage extends StatelessWidget {
               padding: new EdgeInsets.all(16.0),
               child: _unitView(context, viewModel),
             ),
-            ProfileView(),
+//            ProfileView(),
           ],
         ),
       );

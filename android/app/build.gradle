@@ -11,11 +11,6 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
-
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 def keystorePropertiesFile = rootProject.file("key.properties")
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
@@ -25,8 +20,11 @@ if (keystorePropertiesFile.exists()) {
 }
 //keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+apply plugin: 'com.android.application'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     lintOptions {
         disable 'InvalidPackage'
@@ -35,9 +33,9 @@ android {
     defaultConfig {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         minSdkVersion 16
-        targetSdkVersion 27
-        versionCode 7
-        versionName "1.5.1"
+        targetSdkVersion 28
+        versionCode 10
+        versionName "1.5.3"
 
         applicationId "com.mszalek.weight_tracker"
     }
@@ -62,18 +60,16 @@ android {
                 signingConfig signingConfigs.debug
             }
         }
-        }
     }
+}
 
+flutter {
+    source '../..'
+}
 
-
-    flutter {
-        source '../..'
-    }
-
-    dependencies {
-        testImplementation 'junit:junit:4.12'
-        androidTestImplementation 'com.android.support.test:runner:1.0.1'
-        androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    }
-
+dependencies {
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
+apply plugin: 'com.google.gms.google-services'
