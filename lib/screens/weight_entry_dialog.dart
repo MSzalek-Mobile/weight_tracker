@@ -60,7 +60,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
             weightToDisplay: store.state.unit == "kg"
                 ? activeEntry.weight
                 : double.parse(
-                (activeEntry.weight * KG_LBS_RATIO).toStringAsFixed(1)),
+                    (activeEntry.weight * KG_LBS_RATIO).toStringAsFixed(1)),
             onEntryChanged: (entry) =>
                 store.dispatch(new UpdateActiveWeightEntry(entry)),
             onDeletePressed: () {
@@ -89,9 +89,8 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
                 leading: new Icon(Icons.today, color: Colors.grey[500]),
                 title: new DateTimeItem(
                   dateTime: viewModel.weightEntry.dateTime,
-                  onChanged: (dateTime) =>
-                      viewModel.onEntryChanged(
-                          viewModel.weightEntry..dateTime = dateTime),
+                  onChanged: (dateTime) => viewModel.onEntryChanged(
+                      viewModel.weightEntry..dateTime = dateTime),
                 ),
               ),
               new ListTile(
@@ -129,11 +128,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
 
   Widget _createAppBar(BuildContext context, DialogViewModel viewModel) {
     TextStyle actionStyle =
-    Theme
-        .of(context)
-        .textTheme
-        .subhead
-        .copyWith(color: Colors.white);
+        Theme.of(context).textTheme.headline2.copyWith(color: Colors.white);
     Text title = viewModel.isEditMode
         ? const Text("Edit entry")
         : const Text("New entry");
@@ -166,8 +161,7 @@ class WeightEntryDialogState extends State<WeightEntryDialog> {
   _showWeightPicker(BuildContext context, DialogViewModel viewModel) {
     showDialog<double>(
       context: context,
-      builder: (context) =>
-      new NumberPickerDialog.decimal(
+      builder: (context) => new NumberPickerDialog.decimal(
         minValue: viewModel.unit == "kg"
             ? MIN_KG_VALUE
             : (MIN_KG_VALUE * KG_LBS_RATIO).toInt(),

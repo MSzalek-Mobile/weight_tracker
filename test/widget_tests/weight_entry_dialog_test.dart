@@ -15,13 +15,13 @@ void main() {
   WeightEntryDialogReduxState dialogState = new WeightEntryDialogReduxState(
       isEditMode: true, activeEntry: activeEntry);
   WeightEntryDialogReduxState dialogAddState =
-  dialogState.copyWith(isEditMode: false);
+      dialogState.copyWith(isEditMode: false);
   ReduxState defaultState = new ReduxState(weightEntryDialogState: dialogState);
 
   pumpSettingWidget(Store<ReduxState> store, WidgetTester tester) async {
     await tester.pumpWidget(new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new StoreProvider<ReduxState>(
+      return new StoreProvider<ReduxState>(
         store: store,
         child: new MaterialApp(home: new WeightEntryDialog()),
       );
@@ -40,7 +40,7 @@ void main() {
     await pumpSettingWidget(
         new Store<ReduxState>(reduce,
             initialState:
-            defaultState.copyWith(weightEntryDialogState: dialogAddState)),
+                defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
     expect(find.widgetWithText(AppBar, 'New entry'), findsOneWidget);
   });
@@ -57,7 +57,7 @@ void main() {
     await pumpSettingWidget(
         new Store<ReduxState>(reduce,
             initialState:
-            defaultState.copyWith(weightEntryDialogState: dialogAddState)),
+                defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
     expect(find.widgetWithText(FlatButton, 'SAVE'), findsOneWidget);
   });
@@ -74,7 +74,7 @@ void main() {
     await pumpSettingWidget(
         new Store<ReduxState>(reduce,
             initialState:
-            defaultState.copyWith(weightEntryDialogState: dialogAddState)),
+                defaultState.copyWith(weightEntryDialogState: dialogAddState)),
         tester);
     expect(find.widgetWithText(FlatButton, 'DELETE'), findsNothing);
   });
@@ -89,8 +89,8 @@ void main() {
   testWidgets('WeightEntryDialog displays weight in lbs',
       (WidgetTester tester) async {
     await pumpSettingWidget(
-        new Store<ReduxState>(
-            reduce, initialState: defaultState.copyWith(unit: 'lbs')),
+        new Store<ReduxState>(reduce,
+            initialState: defaultState.copyWith(unit: 'lbs')),
         tester);
     expect(find.text('154.0 lbs'), findsOneWidget);
   });
@@ -104,91 +104,89 @@ void main() {
 
   //DatePickerDialog is private
   testWidgets('WeightEntryDialog opens MonthPicker on date click',
-          (WidgetTester tester) async {
-        await pumpSettingWidget(
-            new Store<ReduxState>(reduce, initialState: defaultState), tester);
-        await tester.tap(find.byKey(new Key('CalendarItem')));
-        await tester.pump();
-        expect(find.byType(MonthPicker), findsOneWidget);
-      });
+      (WidgetTester tester) async {
+    await pumpSettingWidget(
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
+    await tester.tap(find.byKey(new Key('CalendarItem')));
+    await tester.pump();
+    // ignore: deprecated_member_use
+    expect(find.byType(MonthPicker), findsOneWidget);
+  });
 
   //TimePicker is private
   testWidgets('WeightEntryDialog opens Dialog on time click',
-          (WidgetTester tester) async {
-        await pumpSettingWidget(
-            new Store<ReduxState>(reduce, initialState: defaultState), tester);
-        await tester.tap(find.byKey(new Key('TimeItem')));
-        await tester.pump();
-        expect(find.byType(Dialog), findsOneWidget);
-      });
+      (WidgetTester tester) async {
+    await pumpSettingWidget(
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
+    await tester.tap(find.byKey(new Key('TimeItem')));
+    await tester.pump();
+    expect(find.byType(Dialog), findsOneWidget);
+  });
 
   testWidgets('WeightEntryDialog opens NumberPickerDialog on weight click',
-          (WidgetTester tester) async {
-        await pumpSettingWidget(
-            new Store<ReduxState>(reduce, initialState: defaultState), tester);
-        await tester.tap(find.text('70.0 kg'));
-        await tester.pump();
-        expect(find.byType(NumberPickerDialog), findsOneWidget);
-        expect(find.text('70'), findsOneWidget);
-        expect(find.text('0'), findsOneWidget);
-      });
+      (WidgetTester tester) async {
+    await pumpSettingWidget(
+        new Store<ReduxState>(reduce, initialState: defaultState), tester);
+    await tester.tap(find.text('70.0 kg'));
+    await tester.pump();
+    expect(find.byType(NumberPickerDialog), findsOneWidget);
+    expect(find.text('70'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
+  });
 
   testWidgets('Clicking Save on edit invokes EditEntryAction with activeEntry',
-          (WidgetTester tester) async {
-        WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
-        var reducer = (state, action) {
-          expect(action, matchers.TypeMatcher<EditEntryAction>());
-          expect((action as EditEntryAction).weightEntry, entry);
-        };
-        await pumpSettingWidget(
-            new Store(
-              reducer,
-              initialState: defaultState.copyWith(
-                weightEntryDialogState: dialogState.copyWith(
-                    activeEntry: entry),
-              ),
-            ),
-            tester);
-        await tester.tap(find.text('SAVE'));
-      });
+      (WidgetTester tester) async {
+    WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+    var reducer = (state, action) {
+      expect(action, matchers.TypeMatcher<EditEntryAction>());
+      expect((action as EditEntryAction).weightEntry, entry);
+    };
+    await pumpSettingWidget(
+        new Store(
+          reducer,
+          initialState: defaultState.copyWith(
+            weightEntryDialogState: dialogState.copyWith(activeEntry: entry),
+          ),
+        ),
+        tester);
+    await tester.tap(find.text('SAVE'));
+  });
 
   testWidgets('Clicking Save on create invokes AddEntryAction with ActiveEntry',
-          (WidgetTester tester) async {
-        WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
-        var reducer = (state, action) {
-          expect(action, matchers.TypeMatcher<AddEntryAction>());
-          expect((action as AddEntryAction).weightEntry, entry);
-        };
-        await pumpSettingWidget(
-            new Store(
-              reducer,
-              initialState: defaultState.copyWith(
-                weightEntryDialogState: dialogAddState.copyWith(
-                    activeEntry: entry),
-              ),
-            ),
-            tester);
-        await tester.tap(find.text('SAVE'));
-      });
+      (WidgetTester tester) async {
+    WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+    var reducer = (state, action) {
+      expect(action, matchers.TypeMatcher<AddEntryAction>());
+      expect((action as AddEntryAction).weightEntry, entry);
+    };
+    await pumpSettingWidget(
+        new Store(
+          reducer,
+          initialState: defaultState.copyWith(
+            weightEntryDialogState: dialogAddState.copyWith(activeEntry: entry),
+          ),
+        ),
+        tester);
+    await tester.tap(find.text('SAVE'));
+  });
 
   testWidgets('Clicking Delete invokes RemoveEntryAction with activeEntry',
-          (WidgetTester tester) async {
-        WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
-        var reducer = (state, action) {
-          expect(action, matchers.TypeMatcher<RemoveEntryAction>());
-          expect((action as RemoveEntryAction).weightEntry, entry);
-        };
-        await pumpSettingWidget(
-            new Store(
-              reducer,
-              initialState: defaultState.copyWith(
-                weightEntryDialogState: dialogState.copyWith(
-                    activeEntry: entry),
-              ),
-            ),
-            tester);
-        await tester.tap(find.text('DELETE'));
-      });
+      (WidgetTester tester) async {
+    WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);
+    var reducer = (state, action) {
+      expect(action, matchers.TypeMatcher<RemoveEntryAction>());
+      expect((action as RemoveEntryAction).weightEntry, entry);
+    };
+    await pumpSettingWidget(
+        new Store(
+          reducer,
+          initialState: defaultState.copyWith(
+            weightEntryDialogState: dialogState.copyWith(activeEntry: entry),
+          ),
+        ),
+        tester);
+    await tester.tap(find.text('DELETE'));
+  });
 
   testWidgets('Changing note updates activeEntry', (WidgetTester tester) async {
     WeightEntry entry = new WeightEntry(new DateTime.now(), 70.0, null);

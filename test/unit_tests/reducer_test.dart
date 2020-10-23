@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test_api/test_api.dart';
+// import 'package:test_api/test_api.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/reducer.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
@@ -49,7 +50,7 @@ void main() {
     ReduxState initialState = new ReduxState();
     DatabaseReference databaseReference = new DatabaseReferenceMock();
     AddDatabaseReferenceAction action =
-    new AddDatabaseReferenceAction(databaseReference);
+        new AddDatabaseReferenceAction(databaseReference);
     //when
     ReduxState newState = reduce(initialState, action);
     //then
@@ -113,7 +114,7 @@ void main() {
     //given
     ReduxState initialState = new ReduxState();
     WeightEntry updatedEntry =
-    new WeightEntry(new DateTime.now(), 60.0, "text");
+        new WeightEntry(new DateTime.now(), 60.0, "text");
     UpdateActiveWeightEntry action = new UpdateActiveWeightEntry(updatedEntry);
     //when
     ReduxState newState = reduce(initialState, action);
@@ -125,7 +126,7 @@ void main() {
     //given
     ReduxState initialState = new ReduxState();
     WeightEntry updatedEntry =
-    new WeightEntry(new DateTime.now(), 60.0, "text");
+        new WeightEntry(new DateTime.now(), 60.0, "text");
     OpenEditEntryDialog action = new OpenEditEntryDialog(updatedEntry);
     //when
     ReduxState newState = reduce(initialState, action);
@@ -137,7 +138,7 @@ void main() {
     //given
     ReduxState initialState = new ReduxState();
     WeightEntry updatedEntry =
-    new WeightEntry(new DateTime.now(), 60.0, "text");
+        new WeightEntry(new DateTime.now(), 60.0, "text");
     OpenEditEntryDialog action = new OpenEditEntryDialog(updatedEntry);
     //when
     ReduxState newState = reduce(initialState, action);
@@ -149,7 +150,7 @@ void main() {
     //given
     ReduxState initialState = new ReduxState(
         weightEntryDialogState:
-        new WeightEntryDialogReduxState(isEditMode: true));
+            new WeightEntryDialogReduxState(isEditMode: true));
     OpenAddEntryDialog action = new OpenAddEntryDialog();
     //when
     ReduxState newState = reduce(initialState, action);
@@ -169,17 +170,17 @@ void main() {
 
   test(
       'reducer OpenAddEntryDialog creates new entry with copied weight from first entry',
-          () {
-        //given
-        ReduxState initialState = new ReduxState(
-            entries: [new WeightEntry(new DateTime.now(), 60.0, "Text")]);
-        OpenAddEntryDialog action = new OpenAddEntryDialog();
-        //when
-        ReduxState newState = reduce(initialState, action);
-        //then
-        expect(newState.weightEntryDialogState.activeEntry?.weight, 60);
-        expect(newState.weightEntryDialogState.activeEntry?.note, null);
-      });
+      () {
+    //given
+    ReduxState initialState = new ReduxState(
+        entries: [new WeightEntry(new DateTime.now(), 60.0, "Text")]);
+    OpenAddEntryDialog action = new OpenAddEntryDialog();
+    //when
+    ReduxState newState = reduce(initialState, action);
+    //then
+    expect(newState.weightEntryDialogState.activeEntry?.weight, 60);
+    expect(newState.weightEntryDialogState.activeEntry?.note, null);
+  });
 
   test('reducer OnAddedAction adds entry to list', () {
     //given
@@ -235,11 +236,10 @@ void main() {
     //then
     expect(newState.removedEntryState.lastRemovedEntry, entry);
   });
-
 }
 
-WeightEntry createEntry(String key, DateTime dateTime, double weight,
-    String note) {
+WeightEntry createEntry(
+    String key, DateTime dateTime, double weight, String note) {
   WeightEntry entry = new WeightEntry(dateTime, weight, note);
   entry.key = key;
   return entry;
