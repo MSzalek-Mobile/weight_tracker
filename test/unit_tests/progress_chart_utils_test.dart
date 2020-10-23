@@ -1,4 +1,5 @@
-import 'package:test_api/test_api.dart';
+// import 'package:test_api/test_api.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:weight_tracker/model/weight_entry.dart';
 import 'package:weight_tracker/widgets/progress_chart_utils.dart' as utils;
 
@@ -16,8 +17,8 @@ void main() {
     int daysToShow = 7;
     List<WeightEntry> entries = [entry1, entry2, entry3, entry4];
     //when
-    List<WeightEntry> newEntries =
-        utils.prepareEntryList(entries, now.subtract(Duration(days: daysToShow-1)));
+    List<WeightEntry> newEntries = utils.prepareEntryList(
+        entries, now.subtract(Duration(days: daysToShow - 1)));
     //then
     expect(newEntries, contains(entry1));
     expect(newEntries, contains(entry2));
@@ -34,8 +35,8 @@ void main() {
         new WeightEntry(now.subtract(new Duration(days: 2)), 90.0, null);
     List<WeightEntry> entries = [firstEntryAfterBorder, lastEntryBeforeBorder];
     //when
-    List<WeightEntry> newEntries =
-        utils.prepareEntryList(entries, now.subtract(Duration(days: daysToShow-1)));
+    List<WeightEntry> newEntries = utils.prepareEntryList(
+        entries, now.subtract(Duration(days: daysToShow - 1)));
     //then
     expect(newEntries, contains(firstEntryAfterBorder));
     expect(newEntries, isNot(contains(lastEntryBeforeBorder)));

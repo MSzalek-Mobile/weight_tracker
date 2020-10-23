@@ -78,7 +78,7 @@ class ProfileView extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.display1,
+        style: Theme.of(context).textTheme.bodyText1,
       ),
     );
   }

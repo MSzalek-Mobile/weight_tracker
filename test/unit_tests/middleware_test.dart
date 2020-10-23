@@ -1,7 +1,8 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:redux/redux.dart';
-import 'package:test_api/test_api.dart';
+// import 'package:test_api/test_api.dart';
 import 'package:weight_tracker/logic/actions.dart';
 import 'package:weight_tracker/logic/middleware.dart';
 import 'package:weight_tracker/logic/redux_state.dart';
@@ -38,7 +39,7 @@ void main() {
   test('middleware EditEntryAction invokes child and set', () {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
-    when(firebaseMock.child(typed(any))).thenReturn(firebaseMock);
+    when(firebaseMock.child(any)).thenReturn(firebaseMock);
     ReduxState state = new ReduxState(
         firebaseState: new FirebaseState(mainReference: firebaseMock));
 
@@ -58,7 +59,7 @@ void main() {
   test('middleware RemoveEntryAction invokes child and remove', () {
     //given
     DatabaseReferenceMock firebaseMock = new DatabaseReferenceMock();
-    when(firebaseMock.child(typed(any))).thenReturn(firebaseMock);
+    when(firebaseMock.child(any)).thenReturn(firebaseMock);
     ReduxState state = new ReduxState(
         firebaseState: new FirebaseState(mainReference: firebaseMock));
 
@@ -107,8 +108,7 @@ void main() {
       return state;
     };
     DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
-    when(databaseReferenceMock.child(typed(any))).thenReturn(
-        databaseReferenceMock);
+    when(databaseReferenceMock.child(any)).thenReturn(databaseReferenceMock);
     when(databaseReferenceMock.push()).thenReturn(databaseReferenceMock);
     ReduxState state = new ReduxState(
       weightFromNotes: 70.0,
@@ -132,8 +132,7 @@ void main() {
       return state;
     };
     DatabaseReferenceMock databaseReferenceMock = new DatabaseReferenceMock();
-    when(databaseReferenceMock.child(typed(any))).thenReturn(
-        databaseReferenceMock);
+    when(databaseReferenceMock.child(any)).thenReturn(databaseReferenceMock);
     when(databaseReferenceMock.push()).thenReturn(databaseReferenceMock);
     ReduxState state = new ReduxState(
       weightFromNotes: 70.0,

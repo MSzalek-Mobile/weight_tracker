@@ -45,7 +45,7 @@ class SettingsPage extends StatelessWidget {
         new Expanded(
             child: new Text(
           "Unit",
-          style: Theme.of(context).textTheme.headline,
+          style: Theme.of(context).textTheme.headline1,
         )),
         new DropdownButton<String>(
           key: const Key('UnitDropdown'),
